@@ -1,0 +1,17 @@
+server:
+  port: 8888
+
+spring:
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://www.soyoung.dev:8690/pitch
+    username: dev
+    password: best2
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.server.pitch
+
+logging:
+  level:
+    org.springframework.security: DEBUG
