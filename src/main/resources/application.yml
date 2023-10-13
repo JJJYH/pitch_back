@@ -7,6 +7,10 @@ spring:
     url: jdbc:mariadb://www.soyoung.dev:8690/pitch
     username: dev
     password: best2
+  redis:
+    port: 6379
+    host: www.soyoung.dev
+    password: 1323
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -15,3 +19,4 @@ mybatis:
 logging:
   level:
     org.springframework.security: DEBUG
+
