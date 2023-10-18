@@ -6,11 +6,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class TestRepository {
+public class SecurityRepository {
     private final RedisTemplate<String, String> template;
 
-    public void save(String key, String name){
-        template.opsForValue().set(key,name);
+    public void save(String accessKey, String RefreshKey){
+        template.opsForValue().set(accessKey,RefreshKey);
     }
     public String findByKey(String key){
         return template.opsForValue().get(key);
