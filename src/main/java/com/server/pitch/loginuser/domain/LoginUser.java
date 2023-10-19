@@ -1,4 +1,4 @@
-package com.server.pitch.users.domain;
+package com.server.pitch.loginuser.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,10 +8,9 @@ import org.apache.ibatis.type.Alias;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Alias("Users")
-public class Users {
+@Alias("LoginUser")
+public class LoginUser {
     private String user_id;
-    private String user_email;
     private String user_pw;
     private String user_nm;
     private String role;
