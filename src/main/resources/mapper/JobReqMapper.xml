@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.server.pitch.hire.mapper.JobReqMapper">
+    <!-- JobReq resultMap -->
+    <resultMap id="JobReqMap" type="JobReq">
+        <id property="job_req_no" column="job_req_no"/>
+        <result property="req_title" column="req_title"/>
+        <result property="job_req_date" column="job_req_date"/>
+        <result property="job_role" column="job_role"/>
+        <result property="location" column="location"/>
+        <result property="hire_num" column="hire_num"/>
+        <result property="education" column="education"/>
+        <result property="job_type" column="job_type"/>
+        <result property="job_year" column="job_year"/>
+        <result property="posting_type" column="posting_type"/>
+        <result property="posting_start" column="posting_start"/>
+        <result property="posting_end" column="posting_end"/>
+        <result property="qualification" column="qualification"/>
+        <result property="preferred" column="preferred"/>
+        <result property="job_duties" column="job_duties"/>
+        <result property="req_status" column="req_status"/>
+
+        <!-- Users 객체 매핑 -->
+        <collection property="users" ofType="Users">
+            <id property="user_id" column="user_id"/>
+            <result property="user_email" column="user_email"/>
+            <result property="user_pw" column="user_pw"/>
+            <result property="user_nm" column="user_nm"/>
+            <result property="role" column="role"/>
+            <result property="user_phone" column="user_phone"/>
+            <result property="user_birth" column="user_birth"/>
+        </collection>
+    </resultMap>
+
+    <select id="selectJobReqList" resultMap="JobReqMap">
+        SELECT j.*, u.*
+        FROM jobreq j
+        JOIN users u ON j.user_id = u.user_id
+        where u.role='hr'
+    </select>
+
+    <select id="selectJobReqStatusList" resultMap="JobReqMap">
+        SELECT j.*, u.*
+        FROM jobreq j
+        JOIN users u ON j.user_id = u.user_id
+        WHERE u.role='hr'
+        <if test="selectedStatus != null and selectedStatus.size() > 0">
+            AND j.req_status IN
+            <foreach collection="selectedStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="selectJobReq" resultMap="JobReqMap">
+        select *
+        from jobreq
+        where job_req_no = #{job_req_no}
+    </select>
+
+    
+    <insert id="insertJobReq">
+        <selectKey keyProperty="job_req_no" order="BEFORE" resultType="int">
+            SELECT nextval(job_req_seq)
+        </selectKey>
+
+         INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_role, location, hire_num, education, job_type,
+                        job_year, posting_type, posting_start, posting_end, qualification, preferred,
+                        job_duties, req_status)
+         VALUES (#{job_req_no}, 'hr', #{req_title}, NOW(), #{job_role}, #{location}, #{hire_num}, #{education},
+                #{job_type}, #{job_year}, #{posting_type}, #{posting_start}, #{posting_end},
+                 #{qualification}, #{preferred}, #{job_duties}, #{req_status})
+
+    </insert>
+    
+    <delete id="deleteJobReq">
+        delete from jobreq where job_req_no = #{job_req_no}
+    </delete>
+
+    <update id="updateJobReq">
+        UPDATE jobreq
+        SET
+            req_title = #{req_title},
+            job_role = #{job_role},
+            location = #{location},
+            hire_num = #{hire_num},
+            education = #{education},
+            job_type = #{job_type},
+            job_year = #{job_year},
+            posting_type = #{posting_type},
+            posting_start = #{posting_start},
+            posting_end = #{posting_end},
+            qualification = #{qualification},
+            preferred = #{preferred},
+            job_duties = #{job_duties},
+            req_status = #{req_status}
+        WHERE job_req_no = #{job_req_no}
+</update>
+
+
+
+</mapper>
