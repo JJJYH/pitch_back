@@ -1,8 +1,10 @@
 package com.server.pitch.cv.service;
 
+import com.server.pitch.cv.domain.CV;
 import org.springframework.stereotype.Service;
 
-@Service
-public interface CVService {
+import java.util.List;
 
+public interface CVService {
+    public CV findAll();
 }

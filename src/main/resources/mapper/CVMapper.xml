@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.server.pitch.cv.mapper.CVMapper">
+
+    <select id="selectCVList" resultMap="cvDataViewResultMap">
+        SELECT cv_no,
+               user_id,
+               ps_statement,
+               gender,
+               address,
+               activity_no,
+               activity_detail,
+               end_date,
+               start_date,
+               organization,
+               activity_type,
+               user_id,
+               advantage_no,
+               advantage_type,
+               consent,
+               advantage_detail,
+               career_no,
+               company_name,
+               cv_dept_name,
+               join_date,
+               position,
+               job,
+               salary,
+               note,
+               cert_no,
+               cert_name,
+               publisher,
+               acquisition_date,
+               cv_file_no,
+               file_name,
+               file_type,
+               file_size,
+               upload_date,
+               edu_no,
+               edu_type,
+               enter_date,
+               graduate_date,
+               graduate_type,
+               major,
+               score,
+               total_score,
+               language_no,
+               exam_type,
+               language_name,
+               language_score,
+               skill_no,
+               skill_name,
+               skill_domain,
+               dept_no,
+               user_pw,
+               role,
+               user_phone,
+               user_email,
+               user_birth,
+               user_nm
+        FROM cv_data_view
+    </select>
+
+    <resultMap id="cvDataViewResultMap" type="CV">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <result property="ps_statement" column="ps_statement"/>
+        <result property="gender" column="gender"/>
+        <result property="address" column="address"/>
+        <result property="user_nm" column="user_nm"/>
+        <result property="user_phone" column="user_phone"/>
+        <result property="user_email" column="user_email"/>
+        <result property="user_birth" column="user_birth"/>
+        <collection property="activities" resultMap="activityMap"/>
+        <collection property="advantages" resultMap="advantageMap"/>
+        <collection property="careers" resultMap="careerMap"/>
+        <collection property="certifications" resultMap="certificationMap"/>
+        <collection property="cvFiles" resultMap="cvFileMap"/>
+        <collection property="educations" resultMap="educationMap"/>
+        <collection property="languages" resultMap="languageMap"/>
+        <collection property="skills" resultMap="skillMap"/>
+    </resultMap>
+
+    <resultMap id="activityMap" type="Activity">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="activity_no" column="activity_no"/>
+        <result property="activity_type" column="activity_type"/>
+        <result property="organization" column="organization"/>
+        <result property="activity_type" column="activity_type"/>
+        <result property="start_date" column="start_date"/>
+        <result property="end_date" column="end_date"/>
+        <result property="activity_detail" column="activity_detail"/>
+    </resultMap>
+
+    <resultMap id="advantageMap" type="Advantage">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="advantage_no" column="advantage_no"/>
+        <result property="advantage_type" column="advantage_type"/>
+        <result property="advantage_detail" column="advantage_detail"/>
+        <result property="consent" column="consent"/>
+    </resultMap>
+
+    <resultMap id="careerMap" type="Career">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="career_no" column="career_no"/>
+        <result property="company_name" column="company_name"/>
+        <result property="cv_dept_name" column="cv_dept_name"/>
+        <result property="join_date" column="join_date"/>
+<!--        <result property="quit_date" column="quit_date"/>-->
+        <result property="position" column="position"/>
+        <result property="job" column="job"/>
+        <result property="salary" column="salary"/>
+        <result property="note" column="note"/>
+    </resultMap>
+
+    <resultMap id="certificationMap" type="Certification">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="cert_no" column="cert_no"/>
+        <result property="cert_name" column="cert_name"/>
+        <result property="publisher" column="publisher"/>
+        <result property="acquisition_date" column="acquisition_date"/>
+    </resultMap>
+
+    <resultMap id="cvFileMap" type="CVFile">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="cv_file_no" column="cv_file_no"/>
+        <result property="file_name" column="file_name"/>
+        <result property="file_type" column="file_type"/>
+        <result property="file_size" column="file_size"/>
+        <result property="upload_date" column="upload_date"/>
+        <result property="path" column="path"/>
+    </resultMap>
+
+    <resultMap id="educationMap" type="Education">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="edu_no" column="edu_no"/>
+        <result property="edu_type" column="edu_type"/>
+        <result property="enter_date" column="enter_date"/>
+        <result property="graduate_date" column="graduate_date"/>
+        <result property="graduate_type" column="graduate_type"/>
+        <result property="major" column="major"/>
+        <result property="score" column="score"/>
+        <result property="total_score" column="total_score"/>
+    </resultMap>
+
+    <resultMap id="languageMap" type="Language">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="language_no" column="language_no"/>
+        <result property="exam_type" column="exam_type"/>
+        <result property="language_name" column="language_name"/>
+        <result property="language_score" column="language_score"/>
+    </resultMap>
+
+    <resultMap id="skillMap" type="Skill">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="skill_no" column="skill_no"/>
+        <result property="skill_name" column="skill_name"/>
+        <result property="skill_domain" column="skill_domain"/>
+    </resultMap>
+
+
+
+</mapper>

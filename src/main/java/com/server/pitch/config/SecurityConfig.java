@@ -38,13 +38,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
             http.csrf().disable()
                     .authorizeRequests()
-                    .antMatchers("/admin/**", "/admin", "/login", "/auth/**" ,"/main").permitAll()
+                    .antMatchers("/admin/**", "/admin", "/login", "/auth/**" ,"/main/**").permitAll()
                     .anyRequest().authenticated()
                     .and()
                     .addFilter(getAuthenticationFilter())
                     .addFilter(new TokenFilter(authenticationManager(),securityService));
             http.headers().frameOptions().disable();
     }
+
+
 
     private AuthenticationFilter getAuthenticationFilter() throws Exception{
         AuthenticationFilter authenticationFilter =
