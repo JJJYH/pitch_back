@@ -5,6 +5,7 @@
 
 <mapper namespace="com.server.pitch.cv.mapper.CVMapper">
 
+
     <select id="selectCVList" resultMap="cvDataViewResultMap">
         SELECT cv_no,
                user_id,
@@ -112,7 +113,7 @@
         <result property="company_name" column="company_name"/>
         <result property="cv_dept_name" column="cv_dept_name"/>
         <result property="join_date" column="join_date"/>
-<!--        <result property="quit_date" column="quit_date"/>-->
+        <!--        <result property="quit_date" column="quit_date"/>-->
         <result property="position" column="position"/>
         <result property="job" column="job"/>
         <result property="salary" column="salary"/>
@@ -169,6 +170,70 @@
         <result property="skill_domain" column="skill_domain"/>
     </resultMap>
 
+    <insert id="insertCV">
+        <selectKey keyProperty="cv_no" order="BEFORE" resultType="int">
+            SELECT nextval(cv_no_seq)
+        </selectKey>
+        insert into cv (cv_no, user_id, ps_statement, gender, address)
+        values (#{cv_no},#{user_id},#{ps_statement},#{gender},#{address})
+    </insert>
 
+    <insert id="insertActivity">
+        <selectKey keyProperty="activity_no" order="BEFORE" resultType="int">
+            SELECT nextval(activity_no_seq)
+        </selectKey>
+        insert into activity (activity_no, cv_no, user_id, activity_type, organization, start_date, end_date,activity_detail)
+        values (#{activity_no}, #{cv_no}, #{user_id}, #{activity_type}, #{organization}, #{start_date},#{end_date}, #{activity_detail})
+    </insert>
+
+    <insert id="insertAdvantage">
+        <selectKey keyProperty="advantage_no" order="BEFORE" resultType="int">
+            SELECT nextval(advantage_no_seq)
+        </selectKey>
+        insert into advantage (advantage_no, cv_no, user_id, advantage_type, advantage_detail, consent)
+        values (#{advantage_no},#{cv_no},#{user_id},#{advantage_type},#{advantage_detail},#{consent})
+    </insert>
+
+    <insert id="insertCareer">
+        <selectKey keyProperty="career_no" order="BEFORE" resultType="int">
+            SELECT nextval(career_no_seq)
+        </selectKey>
+        insert into career (career_no, cv_no, user_id, company_name, cv_dept_name, join_date, position, job, salary, note)
+        values (#{career_no},#{cv_no},#{user_id},#{company_name},#{cv_dept_name},#{join_date},#{position},#{job},#{salary},#{note})
+    </insert>
+
+    <insert id="insertCertification">
+        <selectKey keyProperty="cert_no" order="BEFORE" resultType="int">
+            SELECT nextval(cert_no_seq)
+        </selectKey>
+        insert into certification (cert_no, cv_no, user_id, cert_name, publisher, acquisition_date)
+        values (#{cert_no},#{cv_no},#{user_id},#{cert_name},#{publisher},#{acquisition_date})
+    </insert>
+
+    <insert id="insertEducation">
+        <selectKey keyProperty="edu_no" order="BEFORE" resultType="int">
+            SELECT nextval(edu_no_seq)
+        </selectKey>
+        insert into education (edu_no, cv_no, user_id, edu_type, enter_date, graduate_date, graduate_type, major, score,
+                               total_score)
+        values (#{edu_no}, #{cv_no}, #{user_id}, #{edu_type}, #{enter_date}, #{graduate_date}, #{graduate_type},
+                #{major}, #{score}, #{total_score})
+    </insert>
+
+    <insert id="insertLanguage">
+        <selectKey keyProperty="language_no" order="BEFORE" resultType="int">
+            SELECT nextval(language_no_seq)
+        </selectKey>
+        insert into language (language_no, cv_no, user_id, exam_type, language_name, language_score)
+        values (#{language_no},#{cv_no},#{user_id},#{exam_type},#{language_name},#{language_score})
+    </insert>
+
+    <insert id="insertSkill">
+        <selectKey keyProperty="skill_no" order="BEFORE" resultType="int">
+            SELECT nextval(skill_no_seq)
+        </selectKey>
+        insert into skill (skill_no, cv_no, user_id, skill_name, skill_domain)
+        values (#{skill_no},#{cv_no},#{user_id},#{skill_name},#{skill_domain})
+    </insert>
 
 </mapper>

@@ -1,5 +1,7 @@
 package com.server.pitch.cv.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.cv.service.CVService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +11,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/main/cv")
+@RequestMapping("/admin/main/cv")
 public class CVController {
 
     @Autowired
@@ -69,5 +72,15 @@ public class CVController {
     public ResponseEntity<Object> CVAll(){
         log.info(cvService.findAll().toString());
         return ResponseEntity.ok(cvService.findAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<Object> CVCrate(@RequestBody Map<String,Object> requestBody){
+        log.info("Req Data : "+requestBody.toString());
+        ObjectMapper mapper = new ObjectMapper();
+        CV cv = mapper.convertValue(requestBody.get("cv"),CV.class);
+        log.info("CV Data: " + cv);
+        cvService.create(cv);
+        return ResponseEntity.ok("Connect");
     }
 }

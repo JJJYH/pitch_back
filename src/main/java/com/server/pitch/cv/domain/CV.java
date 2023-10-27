@@ -20,7 +20,8 @@ public class CV {
     private String ps_statement;
     private String gender;
     private String address;
-
+    //모집 공고에 대한 직무
+    private String position;
     //추가 정보
     private String user_nm;
     private String user_phone;
@@ -36,6 +37,5 @@ public class CV {
     private List<Education> educations;
     private List<Language> languages;
     private List<Skill> skills;
-
 
 }

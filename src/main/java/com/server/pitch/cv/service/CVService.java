@@ -6,5 +6,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 public interface CVService {
+
     public CV findAll();
+
+    public String create(CV cv);
 }
