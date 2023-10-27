@@ -8,7 +8,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @SpringBootApplication
 public class PitchApplication {
 
-	public static void main(String[] args) {
+	 public static void main(String[] args) {
 		SpringApplication.run(PitchApplication.class, args);
 	}
 
