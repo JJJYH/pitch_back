@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.server.pitch.sort.mapper.SortMapper">
+
+    <!-- 지원자 목록 조회를 위한 resultmap-->
+    <resultMap id="applicantResponseResultMap" type="ApplicantResponse">
+        <id property="apply_no" column="apply_no" />
+        <result property="cv_no" column="cv_no" />
+        <result property="picture" column="picture" />
+        <result property="user_nm" column="user_nm" />
+        <result property="user_birth" column="user_birth" />
+        <result property="applicant_status" column="applicant_status" />
+        <result property="status_type" column="status_type" />
+        <result property="apply_date" column="apply_date" />
+        <result property="read_status" column="read_status" />
+        <result property="gender" column="gender" />
+        <result property="note" column="note" />
+        <result property="career" column="career" />
+        <collection property="evals" column="apply_no = apply_no" ofType="CandidateEval" select="selectEvalList">
+            <result property="job_req_no" column="job_req_no" />
+            <result property="sub1_score" column="sub1_score" />
+            <result property="sub2_score" column="sub2_score" />
+            <result property="note" column="note" />
+        </collection>
+    </resultMap>
+
+    <sql id="statusFilter">
+        <choose>
+            <when test="status == 'F'.toString()">
+                a.applicant_status = 'first'
+            </when>
+            <when test="status == 'S'.toString()">
+                a.applicant_status = 'second'
+            </when>
+            <when test="status == 'FL'.toString()">
+                a.applicant_status = 'final'
+            </when>
+            <when test="status == 'FH'.toString()">
+                a.applicant_status = 'finished'
+            </when>
+            <when test="status == 'A'.toString()">
+                1 = 1
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="typeFilter">
+        <if test="type != null and type != ''">
+            AND (
+            <choose>
+                <when test="type == 'pass'"> a.status_type = '합격대기' </when>
+                <when test="type == 'fail'"> a.status_type = '불합격대기' </when>
+                <when test="type == 'all'"> a.status_type = '합격대기' OR a.status_type = '불합격대기' </when>
+            </choose>
+            )
+        </if>
+    </sql>
+
+    <!--  지원자 목록 조회 메인 쿼리  -->
+    <select id="selectSortList"
+            parameterType="ApplicantRequest"
+            resultMap="applicantResponseResultMap"
+    >
+        SELECT
+        a.apply_no,
+        a.note,
+        a.cv_no,
+        u.user_nm,
+        u.user_email,
+        u.user_birth,
+        a.applicant_status,
+        a.apply_date,
+        a.read_status,
+        a.status_type,
+        cv.gender,
+        CASE WHEN c.career_no IS NOT NULL THEN 'y' ELSE 'n' END AS career
+        FROM apply a
+        JOIN cv ON a.cv_no = cv.cv_no
+        JOIN users u ON a.user_id = u.user_id
+        LEFT JOIN career c ON cv.cv_no = c.cv_no
+        WHERE a.job_posting_no = #{job_posting_no}
+          <include refid="typeFilter"></include>
+        AND
+        <include refid="statusFilter"></include>
+        GROUP BY a.apply_no
+    </select>
+
+    <!--  지원자 목록 조회 서브 쿼리  -->
+    <select id="selectEvalList" resultType="CandidateEval">
+        SELECT
+            job_req_no,
+            sub1_score,
+            sub2_score,
+            note
+        FROM candidate_eval
+        WHERE apply_no = #{apply_no}
+    </select>
+
+    <!-- 지원자 합격/불합격 처리 쿼리 -->
+    <update id="updateStatus" parameterType="java.util.LinkedHashMap">
+        UPDATE
+            apply
+        <set>
+            <if test="applicant_status != null and applicant_status != ''">
+                applicant_status=#{applicant_status},
+            </if>
+            <if test="status_type != null and status_type != ''">
+                status_type=#{status_type},
+            </if>
+        </set>
+        WHERE apply_no = #{apply_no}
+    </update>
+
+    <!-- 지원자 관리 페이지 상단 공고 정보 조회 쿼리 -->
+    <select id="selectPostingInfo" parameterType="int" resultType="PostingInfoResponse">
+        SELECT
+            jr.job_req_no,
+            jp.job_posting_no,
+            jp.posting_status,
+            jr.req_title,
+            jr.posting_type,
+            jr.hire_num,
+            COUNT(CASE WHEN a.status_type = '최종합격' THEN 1 ELSE NULL END) AS hired_num,
+            COUNT(a.job_posting_no) AS total_applicants,
+            jr.job_type,
+            jr.posting_start,
+            jr.posting_end,
+            (SELECT COUNT(*) FROM liked l WHERE l.job_posting_no = jp.job_posting_no) AS likedCnt
+        FROM
+            jobreq jr
+                JOIN
+            jobposting jp ON jr.job_req_no = jp.job_req_no
+                LEFT JOIN
+            apply a ON jp.job_posting_no = a.job_posting_no
+        WHERE
+            jp.job_posting_no = ${job_posting_no}
+        GROUP BY
+            jr.job_req_no,
+            jp.job_posting_no,
+            jp.posting_status,
+            jr.req_title,
+            jr.posting_type,
+            jr.hire_num,
+            jr.job_type,
+            jr.posting_start,
+            jr.posting_end
+    </select>
+
+</mapper>
