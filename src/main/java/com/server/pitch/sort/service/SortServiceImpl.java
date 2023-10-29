@@ -1,5 +1,6 @@
 package com.server.pitch.sort.service;
 
+import com.server.pitch.sort.domain.ApplicantDetailResonse;
 import com.server.pitch.sort.domain.ApplicantRequest;
 import com.server.pitch.sort.domain.ApplicantResponse;
 import com.server.pitch.sort.domain.PostingInfoResponse;
@@ -24,6 +25,11 @@ public class SortServiceImpl implements SortService{
     }
 
     @Override
+    public ApplicantDetailResonse findOne(int applyNo) {
+        return mapper.selectApplicant(applyNo);
+    }
+
+    @Override
     public String statusTypeUpdate(List<Map<String, Object>> data) {
         data.forEach(row -> {
             try {
@@ -37,38 +43,60 @@ public class SortServiceImpl implements SortService{
 
     @Override
     public String statusUpdate(Map<String, Object> data) {
-        String type = (String)data.get("type"); //1, 2차 합격 = 평가 전, 최종 합격 = 최종합격, 불합격 = 서류,2차,최종 불합격
-        String status = (String)data.get("status");
-        String newStatus = "평가전";
-        String contents = (String)data.get("contents");
+        String type = (String) data.get("type");
+        String statusType = (String) data.get("status_type");
+        String status = "";
+        String newStatus = "";
+        String newStatusType = "평가전";
 
+        if ("pass".equals(type)) {
+            switch (statusType) {
+                case "서류전형":
+                    newStatus = "second";
+                    status = "F";
+                    break;
+                case "면접전형":
+                    newStatus = "final";
+                    status = "S";
+                    break;
+                case "최종합격":
+                    newStatus = "final";
+                    newStatusType = "최종합격";
+                    status = "FL";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid statusType: " + statusType);
+            }
+        } else if ("fail".equals(type)) {
+            switch (statusType) {
+                case "서류전형":
+                    status = "F";
+                    break;
+                case "최종합격":
+                    status = "FL";
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid statusType: " + statusType);
+            }
+            newStatus = "finished";
+            newStatusType = statusType.substring(0, 2) + " 불합격";
+        } else {
+            throw new IllegalArgumentException("Invalid type: " + type);
+        }
 
-        
-        //합격처리할 리스트 먼저 뽑아옴 -> apply_no, email
-        //type으로 pass/fail/all에 따라 다른 양식으로 메일이 발송되어야 함
-        //서비스 메서드명도 바뀌어야 함
-        //합격 발표 후 상태 변경 -> 다음 전형으로 & 대기 상태
         ApplicantRequest req = new ApplicantRequest(
-                (Integer) data.get("job_posting_no"),
-                (String) data.get("type"), //pass or fail
-                (String) data.get("status")
+                Integer.parseInt((String)data.get("job_posting_no")),
+                type,
+                status
         );
 
-        List<ApplicantResponse> list = mapper.selectSortList(req); //조회할 때도 type 필터 추가해줘야함
+        List<ApplicantResponse> list = mapper.selectSortList(req);
 
-        list.forEach(row -> {
-//            if("pass".equals(status)) {
-//                if("서류전형".equals()) {
-//
-//                }
-//            } else if("fail".equals(status)) {
-//
-//            }
-
+        for(ApplicantResponse row : list) {
             Map<String, Object> map = new HashMap<>();
 
-            map.put("applicant_status", status);
-            map.put("status_type", type);
+            map.put("applicant_status", newStatus);
+            map.put("status_type", newStatusType);
             map.put("apply_no", row.getApply_no());
 
             try {
@@ -76,12 +104,14 @@ public class SortServiceImpl implements SortService{
             } catch (Exception e) {
                 throw new RuntimeException("쿼리 실행 중 오류 발생", e);
             }
-        });
+        };
+
         return null;
     }
 
+
     @Override
-    public PostingInfoResponse findInfoByPostingNo(int job_posting_no) {
-        return mapper.selectPostingInfo(job_posting_no);
+    public PostingInfoResponse findInfoByPostingNo(int postingNo) {
+        return mapper.selectPostingInfo(postingNo);
     }
 }

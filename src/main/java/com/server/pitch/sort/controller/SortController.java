@@ -1,5 +1,6 @@
 package com.server.pitch.sort.controller;
 
+import com.server.pitch.sort.domain.ApplicantDetailResonse;
 import com.server.pitch.sort.domain.ApplicantRequest;
 import com.server.pitch.sort.domain.ApplicantResponse;
 import com.server.pitch.sort.domain.PostingInfoResponse;
@@ -64,8 +65,21 @@ public class SortController {
     @PutMapping("/{job_posting_no}/acceptance")
     public void handleAcceptance(@PathVariable int job_posting_no, @RequestBody Map<String, Object> data) {
         log.info("==================================acceptance controller=====================================");
-        log.info(data);
-        //service.statusUpdate(data);
+
+        service.statusUpdate(data);
     }
+
+    /**
+     * 지원자 상세 정보를 조회하는 api
+     * @param job_posting_no,apply_no  관리할 공고 번호
+     * @return ApplicantDetailResonse 지원자 상세
+     */
+    @GetMapping("/{job_posting_no}/sort/{apply_no}/detail")
+    public ApplicantDetailResonse cvOne(@PathVariable int job_posting_no, @PathVariable int apply_no) {
+        log.info("==================================applicant detail controller=====================================");
+
+        return service.findOne(apply_no);
+    }
+
 }
 
