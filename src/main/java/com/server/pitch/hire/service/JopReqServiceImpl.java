@@ -30,13 +30,19 @@ public class JopReqServiceImpl implements JobReqService {
     }
 
     @Override
-    public void createJobReq(JobReq jobReq) {
+    public int createJobReq(JobReq jobReq) {
         jobReqMapper.insertJobReq(jobReq);
+        return jobReq.getJob_req_no();
     }
 
     @Override
     public void deleteJobReq(int job_req_no) {
         jobReqMapper.deleteJobReq(job_req_no);
+    }
+
+    @Override
+    public void deleteJobReqList(List<Integer> jobReqNo) {
+        jobReqMapper.deleteJobReqList(jobReqNo);
     }
 
     @Override

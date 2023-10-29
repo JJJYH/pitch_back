@@ -41,6 +41,7 @@
         FROM jobreq j
         JOIN users u ON j.user_id = u.user_id
         where u.role='hr'
+        order by j.job_req_date desc, j.job_req_no desc;
     </select>
 
     <select id="selectJobReqStatusList" resultMap="JobReqMap">
@@ -54,6 +55,7 @@
                 #{status}
             </foreach>
         </if>
+        order by j.job_req_date desc, j.job_req_no desc;
     </select>
 
     <select id="selectJobReq" resultMap="JobReqMap">
@@ -71,7 +73,7 @@
          INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_role, location, hire_num, education, job_type,
                         job_year, posting_type, posting_start, posting_end, qualification, preferred,
                         job_duties, req_status)
-         VALUES (#{job_req_no}, 'hr', #{req_title}, NOW(), #{job_role}, #{location}, #{hire_num}, #{education},
+         VALUES (#{job_req_no}, 'hr', #{req_title}, #{job_req_date}, #{job_role}, #{location}, #{hire_num}, #{education},
                 #{job_type}, #{job_year}, #{posting_type}, #{posting_start}, #{posting_end},
                  #{qualification}, #{preferred}, #{job_duties}, #{req_status})
 
@@ -79,6 +81,13 @@
     
     <delete id="deleteJobReq">
         delete from jobreq where job_req_no = #{job_req_no}
+    </delete>
+
+    <delete id="deleteJobReqList">
+        delete from jobreq where req_status = '작성중' and job_req_no in
+        <foreach collection="jobReqNo" item="jobReqNo" open="(" separator="," close=")">
+            #{jobReqNo}
+        </foreach>
     </delete>
 
     <update id="updateJobReq">

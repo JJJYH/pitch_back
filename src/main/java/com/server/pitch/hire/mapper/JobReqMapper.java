@@ -12,6 +12,7 @@ public interface JobReqMapper {
     public JobReq selectJobReq(int job_req_no);
     public void insertJobReq(JobReq jobReq);
     public void deleteJobReq(int job_req_no);
+    public void deleteJobReqList(List<Integer> jobReqNo);
     public void updateJobReq(JobReq jobReq);
 
 }
