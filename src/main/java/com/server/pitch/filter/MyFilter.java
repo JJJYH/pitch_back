@@ -46,12 +46,12 @@ public class MyFilter implements Filter {
         String subject = null;
 
         try {
-            subject = Jwts.parser().setSigningKey(env.getProperty("token.asecret"))
+            subject = Jwts.parser().setSigningKey("jwtAccess")
                     .parseClaimsJws(jwt).getBody().getSubject();
         } catch (Exception e) {
             result = false;
         }
-        System.out.println(subject);
+        log.info(subject);
 
         if(subject == null || subject.isEmpty()){
             result = false;

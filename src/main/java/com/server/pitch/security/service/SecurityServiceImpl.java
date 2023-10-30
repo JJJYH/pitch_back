@@ -5,6 +5,7 @@ import com.server.pitch.security.domain.RefreshToken;
 import com.server.pitch.security.repository.RedisTokenRepository;
 import com.server.pitch.users.domain.Users;
 import com.server.pitch.users.mapper.UsersMapper;
+import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -22,6 +23,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 @Service
 @Slf4j
@@ -82,6 +84,96 @@ public class SecurityServiceImpl implements SecurityService{
         user.setUser_pw(passwordEncoder.encode((user.getUser_pw())));
         usersMapper.insertUser(user);
         return user;
+    }
+
+    @Override
+    public String createAccessToken(String user_id) {
+        return Jwts.builder()
+                .setSubject(user_id)
+                .setExpiration(new Date(System.currentTimeMillis()+
+                        Long.parseLong(env.getProperty("token.expiration_time"))))
+                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.asecret"))
+                .compact();
+    }
+
+    @Override
+    public String createRefreshToken(String accessToken, String user_id) {
+        return Jwts.builder()
+                .setSubject(accessToken)
+                .setExpiration(new Date(System.currentTimeMillis()+
+                        Long.parseLong(env.getProperty("token.refreshToken_time"))))
+                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.rsecret"))
+                .compact();
+    }
+
+    @Override
+    public boolean checkedAccessTokenValid(String token) {
+        try {
+            Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token);
+            return true;
+        }catch (SignatureException e){
+            log.error("Invalid JWT Signature: {}", e.getMessage());
+        }catch (MalformedJwtException e){
+            log.error("Invalid Access Token: {}", e.getMessage());
+        }catch (ExpiredJwtException e){
+            log.error("Access Token is Expired: {}", e.getMessage());
+        }catch (UnsupportedJwtException e){
+            log.error("This Token is unsupported: {}", e.getMessage());
+        }catch (IllegalArgumentException e){
+            log.error("JWT claims string is empty: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public boolean checkedRefreshTokenValid(String token) {
+        try {
+            Jwts.parser().setSigningKey("jwtRefresh").parseClaimsJws(token);
+            return true;
+        }catch (SignatureException e){
+            log.error("Invalid JWT Signature: {}", e.getMessage());
+        }catch (MalformedJwtException e){
+            log.error("Invalid Refresh Token: {}", e.getMessage());
+        }catch (ExpiredJwtException e){
+            log.error("Access Token is Expired: {}", e.getMessage());
+        }catch (UnsupportedJwtException e){
+            log.error("This Token is unsupported: {}", e.getMessage());
+        }catch (IllegalArgumentException e){
+            log.error("JWT claims string is empty: {}", e.getMessage());
+        }
+        return false;
+    }
+
+    @Override
+    public String getUserIdFromAccessToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
+    @Override
+    public boolean checkedRefreshTokenByAccessToken(String token) {
+        String refreshToken = redisTokenRepository.findByAccessToken(token).getRefreshToken();
+        if (refreshToken!=null){
+            return checkedRefreshTokenValid(refreshToken);
+        }else {
+            log.error("RefreshToken is not valid");
+            return false;
+        }
+    }
+
+    @Override
+    public RefreshToken updateRedisHashToken(String accessToken) {
+        String newAccessToken = null;
+        RefreshToken redisToken = redisTokenRepository.findByAccessToken(accessToken);
+        newAccessToken = createAccessToken(redisToken.getUser_id());
+        redisToken.setAccessToken(newAccessToken);
+        redisTokenRepository.save(redisToken);
+        return redisToken;
+    }
+
+    @Override
+    public boolean isExpiredToken(String token) {
+        return false;
     }
 
     @Override

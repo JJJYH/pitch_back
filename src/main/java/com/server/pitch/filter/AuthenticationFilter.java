@@ -96,7 +96,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         securityService.saveToken(refreshToken, user.getUser_id(), accessToken);
         //securityRepository.save(accessToken, refreshToken);
 
-        response.addHeader("AccessToken", accessToken);
+
+        response.addHeader("accessToken", accessToken);
 
     }
 }
