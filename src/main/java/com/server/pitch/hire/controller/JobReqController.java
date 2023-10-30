@@ -1,14 +1,14 @@
 package com.server.pitch.hire.controller;
 
 import com.server.pitch.hire.domain.JobReq;
-import com.server.pitch.hire.domain.JobReqLists;
+import com.server.pitch.hire.domain.JobReqList;
 import com.server.pitch.hire.service.JobReqService;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 
 @RestController
@@ -25,7 +25,7 @@ public class JobReqController {
 
 
    @PostMapping("/statuslist")
-   public List<JobReq> jobReqAllByStatus(@RequestBody JobReqLists jobReqLists){
+   public List<JobReq> jobReqAllByStatus(@RequestBody JobReqList jobReqLists){
        //log.info(jobReqStatus.toString());
        return jobReqService.findAllByStatus(jobReqLists.getSelectedStatus());
 
@@ -49,7 +49,7 @@ public class JobReqController {
    }
 
    @DeleteMapping("/delete/checked")
-   public void jobReqListDelete(@RequestBody JobReqLists jobReqLists){
+   public void jobReqListDelete(@RequestBody JobReqList jobReqLists){
        jobReqService.deleteJobReqList(jobReqLists.getJobReqNo());
    }
 
@@ -58,4 +58,11 @@ public class JobReqController {
        jobReq.setJob_req_no(job_req_no);
        jobReqService.modifyJobReq(jobReq);
    }
+
+
+    @PostMapping("/search")
+    public List<JobReq> combinedSearch(@RequestBody Map<String, Object> searchParams){
+       log.info(searchParams.toString());
+        return jobReqService.combinedSearchByThings(searchParams);
+    }
 }

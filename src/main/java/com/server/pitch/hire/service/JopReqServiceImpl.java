@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -48,5 +49,10 @@ public class JopReqServiceImpl implements JobReqService {
     @Override
     public void modifyJobReq(JobReq jobReq) {
         jobReqMapper.updateJobReq(jobReq);
+    }
+
+    @Override
+    public List<JobReq> combinedSearchByThings(Map<String, Object> params) {
+        return jobReqMapper.combinedSearchByThings(params);
     }
 }

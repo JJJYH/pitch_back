@@ -108,7 +108,37 @@
             job_duties = #{job_duties},
             req_status = #{req_status}
         WHERE job_req_no = #{job_req_no}
-</update>
+    </update>
+
+
+    <!--  날짜, 검색, 상태 별 조회 -->
+    <select id="combinedSearchByThings" resultMap="JobReqMap">
+        SELECT j.*, u.*
+        FROM jobreq j
+        JOIN users u ON j.user_id = u.user_id
+        WHERE u.role = 'hr'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (j.req_title LIKE CONCAT_WS('%', #{searchKeyword}, '%')
+            OR j.job_role LIKE CONCAT_WS('%', #{searchKeyword}, '%')
+            OR j.location LIKE CONCAT_WS('%', #{searchKeyword}, '%')
+            OR j.job_duties LIKE CONCAT_WS('%', #{searchKeyword}, '%'))
+        </if>
+        <if test="startDate != null and endDate != null">
+            AND j.job_req_date BETWEEN #{startDate} AND date_add(#{endDate}, Interval 1 day)
+        </if>
+        <if test="selectedStatus != null and selectedStatus.size() > 0">
+            AND j.req_status IN
+            <foreach collection="selectedStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY j.job_req_date DESC, j.job_req_no DESC;
+    </select>
+
+
+
+
+
 
 
 

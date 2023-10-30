@@ -4,6 +4,7 @@ import com.server.pitch.hire.domain.JobReq;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface JobReqMapper {
@@ -14,5 +15,6 @@ public interface JobReqMapper {
     public void deleteJobReq(int job_req_no);
     public void deleteJobReqList(List<Integer> jobReqNo);
     public void updateJobReq(JobReq jobReq);
+    public List<JobReq> combinedSearchByThings(Map<String, Object> params);
 
 }
