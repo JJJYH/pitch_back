@@ -4,6 +4,7 @@ import com.server.pitch.security.service.SecurityService;
 import com.server.pitch.users.domain.Users;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
+@Slf4j
 public class TokenFilter extends BasicAuthenticationFilter {
     private SecurityService securityService;
 
@@ -40,7 +42,8 @@ public class TokenFilter extends BasicAuthenticationFilter {
             return;
         }
         String token = request.getHeader("Authorization").substring(7);
-        Claims claims = Jwts.parser().setSigningKey("user_token").parseClaimsJws(token).getBody();
+        log.info(token);
+        Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
         String userID = claims.getSubject();
 
         Users user = securityService.findById(userID);

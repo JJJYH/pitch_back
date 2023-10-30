@@ -1,6 +1,7 @@
 package com.server.pitch.security.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.server.pitch.security.domain.RefreshToken;
 import com.server.pitch.users.domain.Users;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -16,5 +17,20 @@ public interface SecurityService extends UserDetailsService {
     public String getAccessToken(String authorizationCode);
 
     public JsonNode getUserResource(String accessToken);
+
+    public String createAccessToken(String user_id);
+
+    public String createRefreshToken(String accessToken, String user_id);
+
+    public boolean checkedAccessTokenValid(String token);
+    public boolean checkedRefreshTokenValid(String token);
+
+    public boolean isExpiredToken(String token);
+
+    public String getUserIdFromAccessToken(String token);
+
+    public boolean checkedRefreshTokenByAccessToken(String token);
+
+    public RefreshToken updateRedisHashToken(String token);
 
 }
