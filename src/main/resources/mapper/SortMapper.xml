@@ -149,73 +149,42 @@
             jr.posting_end
     </select>
 
-    <!-- 지원자 상세 정보를 조회하는 쿼리 -->
-    <select id="selectApplicant" resultType="ApplicantDetailResponse">
-        SELECT *
-        FROM cv_data_view
-        WHERE apply_no = #{}
+<!--     지원자 상세 정보를 조회하는 쿼리-->
+    <select id="selectApplicant" resultMap="applicantDetailResponseResultMap">
+        SELECT
+            a.apply_no,
+            a.applicant_status,
+            a.apply_date,
+            a.read_status,
+            a.status_type,
+            a.note,
+            cv.*
+        FROM
+            apply a
+                JOIN
+            cv_data_view cv ON a.cv_no = cv.cv_no
+        WHERE
+            a.apply_no = #{applyNo}
     </select>
 
-    <select id="selectCVList" resultMap="cvDataViewResultMap">
-        SELECT cv_no,
-               user_id,
-               ps_statement,
-               gender,
-               address,
-               activity_no,
-               activity_detail,
-               end_date,
-               start_date,
-               organization,
-               activity_type,
-               user_id,
-               advantage_no,
-               advantage_type,
-               consent,
-               advantage_detail,
-               career_no,
-               company_name,
-               cv_dept_name,
-               join_date,
-               position,
-               job,
-               salary,
-               note,
-               cert_no,
-               cert_name,
-               publisher,
-               acquisition_date,
-               cv_file_no,
-               file_name,
-               file_type,
-               file_size,
-               upload_date,
-               edu_no,
-               edu_type,
-               enter_date,
-               graduate_date,
-               graduate_type,
-               major,
-               score,
-               total_score,
-               language_no,
-               exam_type,
-               language_name,
-               language_score,
-               skill_no,
-               skill_name,
-               skill_domain,
-               dept_no,
-               user_pw,
-               role,
-               user_phone,
-               user_email,
-               user_birth,
-               user_nm
-        FROM cv_data_view
-    </select>
+    <!-- 지원자 목록 조회를 위한 resultmap-->
+    <resultMap id="applicantDetailResponseResultMap" type="ApplicantDetailResponse">
+        <id property="apply_no" column="apply_no" />
+        <result property="applicant_status" column="applicant_status" />
+        <result property="status_type" column="status_type" />
+        <result property="apply_date" column="apply_date" />
+        <result property="read_status" column="read_status" />
+        <result property="note" column="note" />
+        <collection property="cv" resultMap="cvDataViewResultMap"/>
+        <collection property="evals" column="apply_no = apply_no" ofType="CandidateEval" select="selectEvalList">
+            <result property="job_req_no" column="job_req_no" />
+            <result property="sub1_score" column="sub1_score" />
+            <result property="sub2_score" column="sub2_score" />
+            <result property="note" column="note" />
+        </collection>
+    </resultMap>
 
-    <resultMap id="cvDataViewResultMap" type="CV">
+    <resultMap id="cvDataViewResultMap" type="com.server.pitch.cv.domain.CV">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <result property="ps_statement" column="ps_statement"/>
@@ -235,7 +204,7 @@
         <collection property="skills" resultMap="skillMap"/>
     </resultMap>
 
-    <resultMap id="activityMap" type="Activity">
+    <resultMap id="activityMap" type="com.server.pitch.cv.domain.Activity">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="activity_no" column="activity_no"/>
@@ -247,7 +216,7 @@
         <result property="activity_detail" column="activity_detail"/>
     </resultMap>
 
-    <resultMap id="advantageMap" type="Advantage">
+    <resultMap id="advantageMap" type="com.server.pitch.cv.domain.Advantage">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="advantage_no" column="advantage_no"/>
@@ -256,7 +225,7 @@
         <result property="consent" column="consent"/>
     </resultMap>
 
-    <resultMap id="careerMap" type="Career">
+    <resultMap id="careerMap" type="com.server.pitch.cv.domain.Career">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="career_no" column="career_no"/>
@@ -270,7 +239,7 @@
         <result property="note" column="note"/>
     </resultMap>
 
-    <resultMap id="certificationMap" type="Certification">
+    <resultMap id="certificationMap" type="com.server.pitch.cv.domain.Certification">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="cert_no" column="cert_no"/>
@@ -279,7 +248,7 @@
         <result property="acquisition_date" column="acquisition_date"/>
     </resultMap>
 
-    <resultMap id="cvFileMap" type="CVFile">
+    <resultMap id="cvFileMap" type="com.server.pitch.cv.domain.CVFile">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="cv_file_no" column="cv_file_no"/>
@@ -290,7 +259,7 @@
         <result property="path" column="path"/>
     </resultMap>
 
-    <resultMap id="educationMap" type="Education">
+    <resultMap id="educationMap" type="com.server.pitch.cv.domain.Education">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="edu_no" column="edu_no"/>
@@ -303,7 +272,7 @@
         <result property="total_score" column="total_score"/>
     </resultMap>
 
-    <resultMap id="languageMap" type="Language">
+    <resultMap id="languageMap" type="com.server.pitch.cv.domain.Language">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="language_no" column="language_no"/>
@@ -312,7 +281,7 @@
         <result property="language_score" column="language_score"/>
     </resultMap>
 
-    <resultMap id="skillMap" type="Skill">
+    <resultMap id="skillMap" type="com.server.pitch.cv.domain.Skill">
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <id property="skill_no" column="skill_no"/>
