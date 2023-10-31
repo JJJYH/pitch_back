@@ -45,9 +45,14 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users users_nm = new Users();
-        users_nm.setUser_email(username);
-        Users user = usersMapper.selectUser(users_nm);
+        Users user = new Users();
+        try {
+             user = findByEmail(username);
+             //NullPointerException 유도
+            log.info(user.getUser_nm());
+        }catch (NullPointerException e){
+            user = findById(username);
+        }
         log.info(user.getUser_nm());
 
         if (user == null){
@@ -152,7 +157,13 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Override
     public boolean checkedRefreshTokenByAccessToken(String token) {
-        String refreshToken = redisTokenRepository.findByAccessToken(token).getRefreshToken();
+        String refreshToken = null;
+        try {
+             refreshToken = redisTokenRepository.findByAccessToken(token).getRefreshToken();
+        }catch (NullPointerException e){
+            log.info("refreshToken is null");
+        }
+        log.info(refreshToken);
         if (refreshToken!=null){
             return checkedRefreshTokenValid(refreshToken);
         }else {
@@ -178,7 +189,7 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Override
     public void socialLogin(String code) {
-        System.out.println("code = "+code);
+        log.info("code = "+code);
         //System.out.println("registrationID = "+ registrationID);
     }
 
@@ -190,6 +201,9 @@ public class SecurityServiceImpl implements SecurityService{
         String tokenUri = env.getProperty("oauth2.google.token-uri");
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        log.info(clientId);
+        log.info(clientSecret);
+        log.info(tokenUri);
         params.add("code", authorizationCode);
         params.add("clientId", clientId);
         params.add("clientSecret", clientSecret);
@@ -201,7 +215,7 @@ public class SecurityServiceImpl implements SecurityService{
 
         HttpEntity entity = new HttpEntity(params, headers);
 
-        System.out.println("1");
+        log.info("1");
         ResponseEntity<JsonNode> responseNode = restTemplate.exchange(tokenUri, HttpMethod.POST, entity, JsonNode.class);
         JsonNode accessTokenNode = responseNode.getBody();
         System.out.println(accessTokenNode);

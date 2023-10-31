@@ -34,7 +34,7 @@ public class MyFilter implements Filter {
         } else {
             String jwt = authorizationHeader.replace("Bearer ", "").trim(); // 공백 제거
             if (!isJwtValid(jwt)) {
-                //onError(response, "UNAUTHORIZATION2");
+                onError(response, "UNAUTHORIZATION");
             }
         }
 
