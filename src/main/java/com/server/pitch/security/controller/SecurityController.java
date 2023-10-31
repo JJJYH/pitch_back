@@ -7,11 +7,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -20,6 +23,9 @@ public class SecurityController {
 
     @Autowired
     SecurityService securityService;
+
+    @Autowired
+    Environment env;
 
 //    @GetUserAccessToken
 //    @GetMapping("/check-session")
@@ -59,5 +65,11 @@ public class SecurityController {
         //System.out.println(securityService.getAccessToken(code));
         String accessToken = securityService.getAccessToken(code);
         System.out.println(securityService.getUserResource(accessToken));
+    }
+
+    @GetMapping("/google-login")
+    public ResponseEntity<String> googleLogin(){
+       log.info("1. 구글 로그인");
+        return ResponseEntity.status(HttpStatus.OK).body("구글 로그인");
     }
 }

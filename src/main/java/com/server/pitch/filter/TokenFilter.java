@@ -43,6 +43,9 @@ public class TokenFilter extends BasicAuthenticationFilter {
         }
         String token = request.getHeader("Authorization").substring(7);
         log.info(token);
+        if(!securityService.checkedRefreshTokenByAccessToken(token)){
+            onError(response, "AccessToken is not valid");
+        }
         Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
         String userID = claims.getSubject();
 
@@ -57,4 +60,11 @@ public class TokenFilter extends BasicAuthenticationFilter {
         chain.doFilter(request,response);
 
     }
+
+    private void onError(HttpServletResponse response, String httpStatus)
+            throws IOException{
+        response.addHeader("error", httpStatus);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, httpStatus);
+    }
+
 }
