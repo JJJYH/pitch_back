@@ -2,17 +2,19 @@ package com.server.pitch.cv.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.pitch.cv.domain.CV;
+import com.server.pitch.cv.domain.CVFile;
 import com.server.pitch.cv.service.CVService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -82,5 +84,10 @@ public class CVController {
         log.info("CV Data: " + cv);
         cvService.create(cv);
         return ResponseEntity.ok("Connect");
+    }
+
+    @PostMapping("/cvFileUpload")
+    public ResponseEntity<Object> CVFileUpload(@RequestParam("cvfile") MultipartFile[] files, @RequestParam("endPath") String endPath) {
+        return cvService.crateFile(files,endPath);
     }
 }

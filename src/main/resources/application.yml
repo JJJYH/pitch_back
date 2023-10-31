@@ -13,6 +13,10 @@ spring:
     password: 1323
   profiles:
     include: oauth
+  servlet:
+    multipart:
+      maxFileSize: 200MB
+      maxRequestSize: 200MB
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -29,7 +33,6 @@ email:
   password: kycqtaqkiomgrjjr
   smtp_host: smtp.gmail.com
   smtp_port: 465
-
 #logging:
 #  level:
 #    org.springframework.security: DEBUG

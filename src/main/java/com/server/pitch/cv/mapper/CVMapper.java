@@ -14,7 +14,7 @@ public interface CVMapper {
     public int insertAdvantage(Advantage advantage);
     public int insertCareer(Career career);
     public int insertCertification(Certification certification);
-    public int insertCVFile();
+    public int insertCVFile(CVFile cvFile);
     public int insertEducation(Education education);
     public int insertLanguage(Language language);
     public int insertSkill(Skill skill);
