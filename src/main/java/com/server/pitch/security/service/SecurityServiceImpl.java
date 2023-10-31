@@ -221,6 +221,13 @@ public class SecurityServiceImpl implements SecurityService{
         return restTemplate.exchange(authUri, HttpMethod.GET, entity, JsonNode.class).getBody();
     }
 
+    @Override
+    public void logoutByAccessToken(String accessToken) {
+        RefreshToken entity = redisTokenRepository.findByAccessToken(accessToken);
+        log.info(entity.toString());
+        redisTokenRepository.delete(entity);
+    }
+
     @Transactional
     public void saveToken(String refreshToken, String user_id, String accessToken){
         redisTokenRepository.save(new RefreshToken(refreshToken, user_id, accessToken));

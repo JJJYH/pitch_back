@@ -41,7 +41,9 @@ public class SecurityController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logoutAccount(){
+    public ResponseEntity<String> logoutAccount(@RequestHeader(value = "Authorization")String accessToken ){
+        log.info(accessToken);
+        securityService.logoutByAccessToken(accessToken.substring(7));
         return ResponseEntity.status(HttpStatus.OK).body("로그아웃 성공");
     }
 
@@ -52,7 +54,7 @@ public class SecurityController {
     }
 
     @GetMapping("/google")
-    public void oauthInfo(@RequestParam String code){
+    public void oauthInfo(@RequestParam String code) {
         securityService.socialLogin(code);
         //System.out.println(securityService.getAccessToken(code));
         String accessToken = securityService.getAccessToken(code);

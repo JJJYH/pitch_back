@@ -7,11 +7,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @RedisHash(value = "token", timeToLive = 7 * 24 * 60 * 60)
-public class RefreshToken {
+public class RefreshToken implements Serializable {
 
 
     @Id

@@ -33,4 +33,6 @@ public interface SecurityService extends UserDetailsService {
 
     public RefreshToken updateRedisHashToken(String token);
 
+    public void logoutByAccessToken(String accessToken);
+
 }
