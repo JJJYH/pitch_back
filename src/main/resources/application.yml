@@ -13,6 +13,10 @@ spring:
     password: 1323
   profiles:
     include: oauth
+  servlet:
+    multipart:
+      maxFileSize: 200MB
+      maxRequestSize: 200MB
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
@@ -23,7 +27,6 @@ token:
   refreshToken_time: 604800000
   asecret: jwtAccess
   rsecret: jwtRefresh
-
 
 #logging:
 #  level:
