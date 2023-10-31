@@ -24,6 +24,11 @@ token:
   asecret: jwtAccess
   rsecret: jwtRefresh
 
+email:
+  user: xlor4528@gmail.com
+  password: kycqtaqkiomgrjjr
+  smtp_host: smtp.gmail.com
+  smtp_port: 465
 
 #logging:
 #  level:
