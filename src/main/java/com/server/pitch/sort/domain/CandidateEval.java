@@ -12,5 +12,8 @@ public class CandidateEval { //채용평가 테이블
     private String user_id; //로그인아이디
     private int sub1_score; //항목1 점수
     private int sub2_score; //항목2 점수
+    private int sub3_score; //항목3 점수
+    private int sub4_score; //항목4 점수
+    private int sub5_score; //항목5 점수
     private String note; //비고
 }

@@ -1,9 +1,6 @@
 package com.server.pitch.sort.mapper;
 
-import com.server.pitch.sort.domain.ApplicantDetailResponse;
-import com.server.pitch.sort.domain.ApplicantRequest;
-import com.server.pitch.sort.domain.ApplicantResponse;
-import com.server.pitch.sort.domain.PostingInfoResponse;
+import com.server.pitch.sort.domain.*;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -16,4 +13,5 @@ public interface SortMapper {
     public int updateStatusType(Map<String, Object> data);
     public PostingInfoResponse selectPostingInfo(int job_posting_no);
     public int updateStatus(Map<String, Object> data);
+    public int insertEval(CandidateEval eval);
 }
