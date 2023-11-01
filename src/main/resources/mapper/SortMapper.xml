@@ -4,60 +4,23 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.server.pitch.sort.mapper.SortMapper">
-
-    <!-- 지원자 목록 조회를 위한 resultmap-->
-    <resultMap id="applicantResponseResultMap" type="ApplicantResponse">
-        <id property="apply_no" column="apply_no" />
-        <result property="cv_no" column="cv_no" />
-        <result property="picture" column="picture" />
-        <result property="user_nm" column="user_nm" />
-        <result property="user_birth" column="user_birth" />
-        <result property="applicant_status" column="applicant_status" />
-        <result property="status_type" column="status_type" />
-        <result property="apply_date" column="apply_date" />
-        <result property="read_status" column="read_status" />
-        <result property="gender" column="gender" />
-        <result property="note" column="note" />
-        <result property="career" column="career" />
-        <collection property="evals" column="apply_no = apply_no" ofType="CandidateEval" select="selectEvalList">
-            <result property="job_req_no" column="job_req_no" />
-            <result property="sub1_score" column="sub1_score" />
-            <result property="sub2_score" column="sub2_score" />
-            <result property="note" column="note" />
-        </collection>
-    </resultMap>
-
-    <sql id="statusFilter">
-        <choose>
-            <when test="status == 'F'.toString()">
-                a.applicant_status = 'first'
-            </when>
-            <when test="status == 'S'.toString()">
-                a.applicant_status = 'second'
-            </when>
-            <when test="status == 'FL'.toString()">
-                a.applicant_status = 'final'
-            </when>
-            <when test="status == 'FH'.toString()">
-                a.applicant_status = 'finished'
-            </when>
-            <when test="status == 'A'.toString()">
-                1 = 1
-            </when>
-        </choose>
-    </sql>
-
-    <sql id="typeFilter">
-        <if test="type != null and type != ''">
-            AND (
-            <choose>
-                <when test="type == 'pass'"> a.status_type = '합격대기' </when>
-                <when test="type == 'fail'"> a.status_type = '불합격대기' </when>
-                <when test="type == 'all'"> a.status_type IN ('합격대기', '불합격대기')  </when>
-            </choose>
-            )
-        </if>
-    </sql>
+    <!-- 지원자 평가 등록 쿼리 -->
+    <insert id="insertEval" parameterType="CandidateEval">
+        INSERT INTO candidate_eval (
+            apply_no, job_req_no, user_id, sub1_score, sub2_score, sub3_score,
+            sub4_score, sub5_score, note
+        ) VALUES (
+                     #{apply_no},
+                     #{job_req_no},
+                     #{user_id},
+                     #{sub1_score},
+                     #{sub2_score},
+                     #{sub3_score},
+                     #{sub4_score},
+                     #{sub5_score},
+                     #{note}
+                 )
+    </insert>
 
     <!--  지원자 목록 조회 메인 쿼리  -->
     <select id="selectSortList"
@@ -94,6 +57,10 @@
             job_req_no,
             sub1_score,
             sub2_score,
+            sub3_score,
+            sub4_score,
+            sub5_score,
+            user_id,
             note
         FROM candidate_eval
         WHERE apply_no = #{apply_no}
@@ -289,4 +256,61 @@
         <result property="skill_domain" column="skill_domain"/>
     </resultMap>
 
+    <!-- 지원자 목록 조회를 위한 resultmap-->
+    <resultMap id="applicantResponseResultMap" type="ApplicantResponse">
+        <id property="apply_no" column="apply_no" />
+        <result property="cv_no" column="cv_no" />
+        <result property="picture" column="picture" />
+        <result property="user_nm" column="user_nm" />
+        <result property="user_birth" column="user_birth" />
+        <result property="applicant_status" column="applicant_status" />
+        <result property="status_type" column="status_type" />
+        <result property="apply_date" column="apply_date" />
+        <result property="read_status" column="read_status" />
+        <result property="gender" column="gender" />
+        <result property="note" column="note" />
+        <result property="career" column="career" />
+        <collection property="evals" column="apply_no = apply_no" ofType="CandidateEval" select="selectEvalList">
+            <result property="job_req_no" column="job_req_no" />
+            <result property="user_id" column="user_id" />
+            <result property="sub1_score" column="sub1_score" />
+            <result property="sub2_score" column="sub2_score" />
+            <result property="sub3_score" column="sub3_score" />
+            <result property="sub4_score" column="sub4_score" />
+            <result property="sub5_score" column="sub5_score" />
+            <result property="note" column="note" />
+        </collection>
+    </resultMap>
+
+    <sql id="statusFilter">
+        <choose>
+            <when test="status == 'F'.toString()">
+                a.applicant_status = 'first'
+            </when>
+            <when test="status == 'S'.toString()">
+                a.applicant_status = 'second'
+            </when>
+            <when test="status == 'FL'.toString()">
+                a.applicant_status = 'final'
+            </when>
+            <when test="status == 'FH'.toString()">
+                a.applicant_status = 'finished'
+            </when>
+            <when test="status == 'A'.toString()">
+                1 = 1
+            </when>
+        </choose>
+    </sql>
+
+    <sql id="typeFilter">
+        <if test="type != null and type != ''">
+            AND (
+            <choose>
+                <when test="type == 'pass'"> a.status_type = '합격대기' </when>
+                <when test="type == 'fail'"> a.status_type = '불합격대기' </when>
+                <when test="type == 'all'"> a.status_type IN ('합격대기', '불합격대기')  </when>
+            </choose>
+            )
+        </if>
+    </sql>
 </mapper>

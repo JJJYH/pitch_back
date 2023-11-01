@@ -1,10 +1,7 @@
 package com.server.pitch.sort.service;
 
 import com.server.pitch.sort.config.EmailConfig;
-import com.server.pitch.sort.domain.ApplicantDetailResponse;
-import com.server.pitch.sort.domain.ApplicantRequest;
-import com.server.pitch.sort.domain.ApplicantResponse;
-import com.server.pitch.sort.domain.PostingInfoResponse;
+import com.server.pitch.sort.domain.*;
 import com.server.pitch.sort.mapper.SortMapper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +127,11 @@ public class SortServiceImpl implements SortService{
     @Override
     public PostingInfoResponse findInfoByPostingNo(int postingNo) {
         return mapper.selectPostingInfo(postingNo);
+    }
+
+    @Override
+    public void createEval(CandidateEval eval) {
+        mapper.insertEval(eval);
     }
 
     public void sendMail(List<ApplicantResponse> list, String statusType, String contents, String title) {
