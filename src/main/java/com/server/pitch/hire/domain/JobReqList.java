@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class JobReqStatus {
+public class JobReqList {
     private List<String> selectedStatus;
+    private List<Integer> jobReqNo;
 }

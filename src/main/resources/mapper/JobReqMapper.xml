@@ -41,6 +41,7 @@
         FROM jobreq j
         JOIN users u ON j.user_id = u.user_id
         where u.role='hr'
+        order by j.job_req_date desc, j.job_req_no desc;
     </select>
 
     <select id="selectJobReqStatusList" resultMap="JobReqMap">
@@ -54,6 +55,7 @@
                 #{status}
             </foreach>
         </if>
+        order by j.job_req_date desc, j.job_req_no desc;
     </select>
 
     <select id="selectJobReq" resultMap="JobReqMap">
@@ -71,7 +73,7 @@
          INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_role, location, hire_num, education, job_type,
                         job_year, posting_type, posting_start, posting_end, qualification, preferred,
                         job_duties, req_status)
-         VALUES (#{job_req_no}, 'hr', #{req_title}, NOW(), #{job_role}, #{location}, #{hire_num}, #{education},
+         VALUES (#{job_req_no}, 'hr', #{req_title}, #{job_req_date}, #{job_role}, #{location}, #{hire_num}, #{education},
                 #{job_type}, #{job_year}, #{posting_type}, #{posting_start}, #{posting_end},
                  #{qualification}, #{preferred}, #{job_duties}, #{req_status})
 
@@ -79,6 +81,13 @@
     
     <delete id="deleteJobReq">
         delete from jobreq where job_req_no = #{job_req_no}
+    </delete>
+
+    <delete id="deleteJobReqList">
+        delete from jobreq where req_status = '작성중' and job_req_no in
+        <foreach collection="jobReqNo" item="jobReqNo" open="(" separator="," close=")">
+            #{jobReqNo}
+        </foreach>
     </delete>
 
     <update id="updateJobReq">
@@ -99,7 +108,35 @@
             job_duties = #{job_duties},
             req_status = #{req_status}
         WHERE job_req_no = #{job_req_no}
-</update>
+    </update>
+
+
+    <!--  날짜, 검색, 상태 별 조회 -->
+    <select id="combinedSearchByThings" resultMap="JobReqMap">
+        SELECT j.*, u.*
+        FROM jobreq j
+        JOIN users u ON j.user_id = u.user_id
+        WHERE u.role = 'hr'
+        <if test="searchKeyword != null and searchKeyword != ''">
+            AND (j.req_title LIKE CONCAT('%', #{searchKeyword}, '%')
+            OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))
+        </if>
+        <if test="startDate != null and endDate != null">
+            AND j.job_req_date BETWEEN #{startDate} AND date_add(#{endDate}, Interval 1 day)
+        </if>
+        <if test="selectedStatus != null and selectedStatus.size() > 0">
+            AND j.req_status IN
+            <foreach collection="selectedStatus" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+        ORDER BY j.job_req_date DESC, j.job_req_no DESC;
+    </select>
+
+
+
+
+
 
 
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -30,8 +31,9 @@ public class JopReqServiceImpl implements JobReqService {
     }
 
     @Override
-    public void createJobReq(JobReq jobReq) {
+    public int createJobReq(JobReq jobReq) {
         jobReqMapper.insertJobReq(jobReq);
+        return jobReq.getJob_req_no();
     }
 
     @Override
@@ -40,7 +42,17 @@ public class JopReqServiceImpl implements JobReqService {
     }
 
     @Override
+    public void deleteJobReqList(List<Integer> jobReqNo) {
+        jobReqMapper.deleteJobReqList(jobReqNo);
+    }
+
+    @Override
     public void modifyJobReq(JobReq jobReq) {
         jobReqMapper.updateJobReq(jobReq);
+    }
+
+    @Override
+    public List<JobReq> combinedSearchByThings(Map<String, Object> params) {
+        return jobReqMapper.combinedSearchByThings(params);
     }
 }
