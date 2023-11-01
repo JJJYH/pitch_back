@@ -118,10 +118,8 @@
         JOIN users u ON j.user_id = u.user_id
         WHERE u.role = 'hr'
         <if test="searchKeyword != null and searchKeyword != ''">
-            AND (j.req_title LIKE CONCAT_WS('%', #{searchKeyword}, '%')
-            OR j.job_role LIKE CONCAT_WS('%', #{searchKeyword}, '%')
-            OR j.location LIKE CONCAT_WS('%', #{searchKeyword}, '%')
-            OR j.job_duties LIKE CONCAT_WS('%', #{searchKeyword}, '%'))
+            AND (j.req_title LIKE CONCAT('%', #{searchKeyword}, '%')
+            OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))
         </if>
         <if test="startDate != null and endDate != null">
             AND j.job_req_date BETWEEN #{startDate} AND date_add(#{endDate}, Interval 1 day)
