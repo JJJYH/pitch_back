@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface CVMapper {
-    public CV selectCVList();
+    public CV selectCVList(CV cv);
 
     //========================CV Create Part===========================
     public int insertCV(CV cv);
@@ -19,4 +19,14 @@ public interface CVMapper {
     public int insertLanguage(Language language);
     public int insertSkill(Skill skill);
 
+//    UPDATE MAPPER
+    public int updateCV(CV cv);
+    public int updateActivity(Activity activity);
+    public int updateAdvantage(Advantage advantage);
+    public int updateCareer(Career career);
+    public int updateCertification(Certification certification);
+    public int updateCVFile(CVFile cvFile);
+    public int updateEducation(Education education);
+    public int updateLanguage(Language language);
+    public int updateSkill(Skill skill);
 }

@@ -10,10 +10,11 @@ import java.util.List;
 
 public interface CVService {
 
-    public CV findAll();
+    public CV findAll(CV cv);
 
     public String create(CV cv);
 
-    public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath);
+    public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath,int cv_no,String user_id);
 
+    public String modify(CV cv);
 }

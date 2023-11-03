@@ -25,7 +25,7 @@
     </select>
 
     <select id="selectUser" resultMap="userMap">
-        select user_id, user_email, user_pw, user_nm, role from users
+        select user_id, user_email, user_pw, user_nm, role,user_phone,user_birth from users
         <where>
             <if test="user_id != null">
                 AND user_id = #{user_id}

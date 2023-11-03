@@ -37,5 +37,4 @@ public class CV {
     private List<Education> educations;
     private List<Language> languages;
     private List<Skill> skills;
-
 }
