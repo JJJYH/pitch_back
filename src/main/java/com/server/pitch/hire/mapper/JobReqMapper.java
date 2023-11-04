@@ -17,4 +17,5 @@ public interface JobReqMapper {
     public void updateJobReq(JobReq jobReq);
     public List<JobReq> combinedSearchByThings(Map<String, Object> params);
 
+
 }

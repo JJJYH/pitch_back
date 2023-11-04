@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.server.pitch.hire.mapper.JobPostingMapper">
+    <!-- JobReq resultMap -->
+    <resultMap id="JobPostingMap" type="JobPosting">
+        <id property="job_posting_no" column="job_posting_no"/>
+        <result property="posting_status" column="posting_status"/>
+
+        <!-- JobReq 매핑 -->
+        <collection property="jobReq" javaType="JobReq">
+            <id property="job_req_no" column="job_req_no"/>
+            <result property="req_title" column="req_title"/>
+            <result property="job_req_date" column="job_req_date"/>
+            <result property="job_role" column="job_role"/>
+            <result property="location" column="location"/>
+            <result property="hire_num" column="hire_num"/>
+            <result property="education" column="education"/>
+            <result property="job_type" column="job_type"/>
+            <result property="job_year" column="job_year"/>
+            <result property="posting_type" column="posting_type"/>
+            <result property="posting_start" column="posting_start"/>
+            <result property="posting_end" column="posting_end"/>
+            <result property="qualification" column="qualification"/>
+            <result property="preferred" column="preferred"/>
+            <result property="job_duties" column="job_duties"/>
+            <result property="req_status" column="req_status"/>
+        </collection>
+
+        <collection property="users" javaType="Users">
+            <id property="user_id" column="user_id"/>
+            <result property="user_email" column="user_email"/>
+            <result property="user_pw" column="user_pw"/>
+            <result property="user_nm" column="user_nm"/>
+            <result property="role" column="role"/>
+            <result property="user_phone" column="user_phone"/>
+            <result property="user_birth" column="user_birth"/>
+        </collection>
+
+        <collection property="department" javaType="Department">
+            <id property="dept_no" column="dept_no"/>
+            <result property="dept_name" column="dept_name"/>
+            <result property="max_num" column="max_num"/>
+        </collection>
+    </resultMap>
+    
+    <insert id="insertJobPosting">
+        <selectKey keyProperty="job_posting_no" order="BEFORE" resultType="int">
+            SELECT nextval(job_posting_seq)
+        </selectKey>
+        insert into jobposting (job_posting_no, job_req_no, posting_status )
+        values (#{job_posting_no}, #{jobReq.job_req_no},  #{posting_status})
+
+    </insert>
+
+    <!-- 공고를 등록할 때 jobreq의 req_status를 '공고중'으로 업데이트 -->
+    <update id="updateJobReqStatus">
+        UPDATE jobreq
+        SET req_status = '공고중'
+        WHERE job_req_no = #{job_req_no}
+    </update>
+
+
+
+</mapper>
