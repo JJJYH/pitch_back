@@ -108,6 +108,7 @@
             job_type = #{job_type},
             job_year = #{job_year},
             posting_type = #{posting_type},
+            posting_period = #{posting_period},
             posting_start = #{posting_start},
             posting_end = #{posting_end},
             qualification = #{qualification},
@@ -141,16 +142,17 @@
     </select>
 
 
-<!--    <select id="selectUserWithDepartment" resultMap="JobReqMap">-->
-<!--        SELECT u.*, d.*-->
-<!--        FROM users u-->
-<!--                 JOIN department d ON u.dept_no = d.dept_no-->
-<!--        WHERE u.user_id = #{user_id}-->
-<!--    </select>-->
+    <select id="selectUserWithDept" resultMap="JobReqMap">
+        SELECT u.*, d.*
+        FROM users u
+                 JOIN department d ON u.dept_no = d.dept_no
+        WHERE u.role = 'hr'
+    </select>
 
-
-
-
+    <insert id="insertInterviewer">
+        INSERT INTO interviewer (job_req_no, user_id)
+        VALUES (#{job_req_no}, #{interviewer_id})
+    </insert>
 
 
 

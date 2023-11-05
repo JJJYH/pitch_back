@@ -1,7 +1,9 @@
 package com.server.pitch.hire.service;
 
+import com.server.pitch.hire.domain.Interviewer;
 import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.mapper.JobReqMapper;
+import com.server.pitch.users.domain.Users;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -54,5 +56,24 @@ public class JopReqServiceImpl implements JobReqService {
     @Override
     public List<JobReq> combinedSearchByThings(Map<String, Object> params) {
         return jobReqMapper.combinedSearchByThings(params);
+    }
+
+    @Override
+    public List<Users> findUserWithDept() {
+        return jobReqMapper.selectUserWithDept();
+    }
+
+    @Override
+    public void addInterviewersToJobReq(JobReq jobReq, List<String> interviewer_id){
+        jobReqMapper.updateJobReq(jobReq);
+
+        try {
+            for(String id : interviewer_id) {
+                jobReqMapper.insertInterviewer(jobReq.getJob_req_no(), id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

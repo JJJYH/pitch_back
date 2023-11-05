@@ -1,10 +1,13 @@
 package com.server.pitch.hire.domain;
 
+import com.server.pitch.users.domain.Department;
 import com.server.pitch.users.domain.Users;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.type.Alias;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -12,5 +15,6 @@ import org.apache.ibatis.type.Alias;
 @Alias("Interviewer")
 public class Interviewer {
     private JobReq jobReq;
-    private Users users;
+    private List<String> interviewer_id;
+
 }
