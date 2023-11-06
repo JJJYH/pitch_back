@@ -5,8 +5,8 @@
 
 <mapper namespace="com.server.pitch.cv.mapper.CVMapper">
 
-
-    <select id="selectCVList" resultMap="cvDataViewResultMap">
+<!--SELECT QUERY-->
+    <select id="selectCVList" resultMap="cvDataViewResultMap" >
         SELECT cv_no,
                user_id,
                ps_statement,
@@ -63,6 +63,7 @@
                user_birth,
                user_nm
         FROM cv_data_view
+        WHERE cv_no = #{cv_no} AND user_id = #{user_id}
     </select>
 
     <resultMap id="cvDataViewResultMap" type="CV">
@@ -170,12 +171,20 @@
         <result property="skill_domain" column="skill_domain"/>
     </resultMap>
 
+<!--INSERT QUERY-->
     <insert id="insertCV">
         <selectKey keyProperty="cv_no" order="BEFORE" resultType="int">
             SELECT nextval(cv_no_seq)
         </selectKey>
         insert into cv (cv_no, user_id, ps_statement, gender, address)
         values (#{cv_no},#{user_id},#{ps_statement},#{gender},#{address})
+    </insert>
+    <insert id="insertCVFile">
+        <selectKey keyProperty="cv_file_no" order="BEFORE" resultType="int">
+            SELECT nextval(cv_file_no_seq)
+        </selectKey>
+        insert into cvfile (cv_file_no, cv_no, user_id, file_name, file_type, file_size, upload_date, path)
+        values (#{cv_file_no},#{cv_no},#{user_id},#{file_name},#{file_type},#{file_size},#{upload_date},#{path})
     </insert>
 
     <insert id="insertActivity">
@@ -236,4 +245,80 @@
         values (#{skill_no},#{cv_no},#{user_id},#{skill_name},#{skill_domain})
     </insert>
 
+<!--UPDATE QUERY-->
+    <update id="updateCV">
+        <selectKey keyProperty="cv_no" order="BEFORE" resultType="int">
+            SELECT nextval(cv_no_seq)
+        </selectKey>
+        UPDATE cv
+        SET ps_statement = #{ps_statement}, gender = #{gender}, address = #{address}
+        WHERE cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
+
+    <update id="updateActivity">
+        <selectKey keyProperty="activity_no" order="BEFORE" resultType="int">
+            SELECT nextval(activity_no_seq)
+        </selectKey>
+        UPDATE activity
+        SET activity_type = #{activity_type}, organization = #{organization},
+            start_date = #{start_date}, end_date = #{end_date}, activity_detail = #{activity_detail}
+        WHERE activity_no = #{activity_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
+
+    <update id="updateAdvantage">
+        <selectKey keyProperty="advantage_no" order="BEFORE" resultType="int">
+            SELECT nextval(advantage_no_seq)
+        </selectKey>
+        UPDATE advantage
+        SET advantage_type = #{advantage_type}, advantage_detail = #{advantage_detail}, consent = #{consent}
+        WHERE advantage_no = #{advantage_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
+
+    <update id="updateCareer">
+        <selectKey keyProperty="career_no" order="BEFORE" resultType="int">
+            SELECT nextval(career_no_seq)
+        </selectKey>
+        UPDATE career
+        SET company_name = #{company_name}, cv_dept_name = #{cv_dept_name},
+            join_date = #{join_date}, position = #{position}, job = #{job}, salary = #{salary}, note = #{note}
+        WHERE career_no = #{career_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+
+    </update>
+
+    <update id="updateCertification">
+        <selectKey keyProperty="cert_no" order="BEFORE" resultType="int">
+            SELECT nextval(cert_no_seq)
+        </selectKey>
+        UPDATE certification
+        SET cert_name = #{cert_name}, publisher = #{publisher}, acquisition_date = #{acquisition_date}
+        WHERE cert_no = #{cert_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
+
+    <update id="updateEducation">
+        <selectKey keyProperty="edu_no" order="BEFORE" resultType="int">
+            SELECT nextval(edu_no_seq)
+        </selectKey>
+        UPDATE education
+        SET edu_type = #{edu_type}, enter_date = #{enter_date}, graduate_date = #{graduate_date},
+            graduate_type = #{graduate_type}, major = #{major}, score = #{score}, total_score = #{total_score}
+        WHERE edu_no = #{edu_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
+
+    <update id="updateLanguage">
+        <selectKey keyProperty="language_no" order="BEFORE" resultType="int">
+            SELECT nextval(language_no_seq)
+        </selectKey>
+        UPDATE language
+        SET exam_type = #{exam_type}, language_name = #{language_name}, language_score = #{language_score}
+        WHERE language_no = #{language_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
+
+    <update id="updateSkill">
+        <selectKey keyProperty="skill_no" order="BEFORE" resultType="int">
+            SELECT nextval(skill_no_seq)
+        </selectKey>
+        UPDATE skill
+        SET skill_name = #{skill_name}, skill_domain = #{skill_domain}
+        WHERE skill_no = #{skill_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
+    </update>
 </mapper>

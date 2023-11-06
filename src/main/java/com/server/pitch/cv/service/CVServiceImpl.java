@@ -25,8 +25,91 @@ public class CVServiceImpl implements CVService {
     CVMapper cvMapper;
 
     @Override
-    public CV findAll() {
-        return cvMapper.selectCVList();
+    public CV findAll(CV cv) {
+        return cvMapper.selectCVList(cv);
+    }
+
+    @Override
+    @Transactional
+    public String modify(CV cv) {
+        //CV update
+        cvMapper.updateCV(cv);
+        log.info("CV DATA IS UPDATE : " + cv.toString());
+        cv.getActivities()
+                .stream()
+                .forEach(activity ->
+                {
+                    activity.setCv_no(cv.getCv_no());
+                    activity.setUser_id(cv.getUser_id());
+                    log.info("CV DATA IS UPDATE(Activity) : " + activity.toString());
+                    cvMapper.updateActivity(activity);
+                });
+
+        //Advantage insert
+        cv.getAdvantages()
+                .stream()
+                .forEach(advantage ->
+                {
+                    advantage.setCv_no(cv.getCv_no());
+                    advantage.setUser_id(cv.getUser_id());
+                    log.info("CV DATA IS UPDATE(Advantage) : " + advantage.toString());
+                    cvMapper.updateAdvantage(advantage);
+                });
+
+        //Career insert
+        cv.getCareers()
+                .stream()
+                .forEach(career ->
+                {
+                    career.setCv_no(cv.getCv_no());
+                    career.setUser_id(cv.getUser_id());
+                    log.info("CV DATA IS UPDATE(Career) : " + career.toString());
+                    cvMapper.updateCareer(career);
+                });
+
+        //Certification insert
+        cv.getCertifications()
+                .stream()
+                .forEach(certification -> {
+                    certification.setCv_no(cv.getCv_no());
+                    certification.setUser_id(cv.getUser_id());
+                    log.info("CV DATA IS UPDATE(certification) : " + certification.toString());
+                    cvMapper.updateCertification(certification);
+                });
+
+        //CVFile insert
+        //cvMapper.insertCVFile();
+
+        //Education insert
+        cv.getEducations()
+                .stream()
+                .forEach(education ->
+                {
+                    education.setCv_no(cv.getCv_no());
+                    education.setUser_id(cv.getUser_id());
+                    log.info("CV DATA IS UPDATE(education) : " + education.toString());
+                    cvMapper.updateEducation(education);
+                });
+
+        //Language insert
+        cv.getLanguages()
+                .stream()
+                .forEach(language ->
+                {
+                    language.setCv_no(cv.getCv_no());
+                    language.setUser_id(cv.getUser_id());
+                    cvMapper.updateLanguage(language);
+                });
+
+        //Skill insert
+        cv.getSkills()
+                .stream()
+                .forEach(skill -> {
+                    skill.setCv_no(cv.getCv_no());
+                    skill.setUser_id(cv.getUser_id());
+                    cvMapper.updateSkill(skill);
+                });
+        return "";
     }
 
     @Override
@@ -108,7 +191,7 @@ public class CVServiceImpl implements CVService {
         return "";
     }
 
-    public List<CVFile> convertToCVFiles(MultipartFile[] files, String uploadPath) {
+    public List<CVFile> convertToCVFiles(MultipartFile[] files, String uploadPath, int cv_no, String user_id) {
 
 
         // UUID 생성 (파일 이름 중복을 방지하기 위함)
@@ -117,8 +200,8 @@ public class CVServiceImpl implements CVService {
         List<CVFile> cvFileList = Arrays.stream(files)
                 .map(file -> {
                     CVFile cvFile = new CVFile();
-                    cvFile.setCv_no(5); // 임시로 고정값 사용, 실제 데이터에 맞게 수정 필요
-                    cvFile.setUser_id("user"); // 임시로 고정값 사용, 실제 데이터에 맞게 수정 필요
+                    cvFile.setCv_no(cv_no);
+                    cvFile.setUser_id(user_id);
                     cvFile.setFile_size((int) file.getSize());
 
                     //UUID FileName 저장
@@ -150,16 +233,9 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
-    public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath) {
+    public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath, int cv_no, String user_id) {
 
         try {
-            // 파일 Validation
-            for (MultipartFile file : files) {
-                if (file.isEmpty()) {
-                    return ResponseEntity.badRequest().body("업로드한 파일 " + file.getOriginalFilename() + "이 비어 있습니다.");
-                }
-            }
-
             // 원하는 경로
             String uploadPath = "C:\\DouZone\\workspace\\react_work\\pitch_frontend\\public\\" + endPath;
 
@@ -180,14 +256,19 @@ public class CVServiceImpl implements CVService {
                 System.out.println("폴더가 이미 존재합니다.");
             }
 
-            List<CVFile> cvFileList = convertToCVFiles(files, uploadPath);
+            List<CVFile> cvFileList = convertToCVFiles(files, uploadPath,cv_no,user_id);
 
             log.info("BeforeFiles : " + cvFileList.toString());
-            cvFileList
-                    .stream()
-                    .map((eachFile) -> {
-                        return cvMapper.insertCVFile(eachFile);
-                    });
+            try {
+                cvFileList
+                        .stream()
+                        .map((eachFile) -> {
+                            log.info("Each Files : "+ eachFile.toString());
+                            return cvMapper.insertCVFile(eachFile);
+                        }).collect(Collectors.toList());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             log.info("AfterFiles : " + cvFileList.toString());
 
             return ResponseEntity.ok("파일이 성공적으로 업로드되었습니다.");
