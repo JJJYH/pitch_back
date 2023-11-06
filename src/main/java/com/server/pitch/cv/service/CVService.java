@@ -12,9 +12,16 @@ public interface CVService {
 
     public CV findAll(CV cv);
 
-    public String create(CV cv);
+    public int create(CV cv);
+
+    public ResponseEntity<Object> createImageFile(CVFile imgCVFile);
 
     public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath,int cv_no,String user_id);
 
     public String modify(CV cv);
+
+    public int findCVNO(CV cv);
+
+
+
 }

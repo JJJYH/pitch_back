@@ -3,6 +3,7 @@ package com.server.pitch.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -16,5 +17,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .exposedHeaders("accessToken")
                 .allowCredentials(true);
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/images/**","/statement/**","/ect-docs/**","/career/**","/portfolio/**")
+                .addResourceLocations("file:///C:/pitch_resorces/images/","file:///C:/pitch_resorces/Statement/","file:///C:/pitch_resorces/ectDocs/","file:///C:/pitch_resorces/Career/","file:///C:/pitch_resorces/Portfolio/" );
     }
 }

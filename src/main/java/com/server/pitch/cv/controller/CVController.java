@@ -27,15 +27,21 @@ CVController {
 
     @Autowired
     public CVService cvService;
-
+    @GetUserAccessToken
     @PostMapping("/imageUpload")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile file) {
+    public ResponseEntity<String> handleFileUpload(Users loginUSer,@RequestParam("image") MultipartFile file,@RequestParam("cv_no")int cv_no) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("업로드한 파일이 비어 있습니다.");
         }
 
         // 원하는 경로
-        String uploadPath = "C:\\DouZone\\workspace\\react_work\\pitch_frontend\\public\\images";
+        String uploadPath = "C:\\pitch_resorces\\images";
+        CVFile imgCVFile = new CVFile();
+        imgCVFile.setCv_no(cv_no);
+        imgCVFile.setUser_id(loginUSer.getUser_id());
+        imgCVFile.setFile_size((int)file.getSize());
+        imgCVFile.setUpload_date(new Date(System.currentTimeMillis()));
+
 
         // 해당 경로에 디렉토리가 없다면 생성
         File folder = new File(uploadPath);
@@ -55,17 +61,19 @@ CVController {
         }
         // 이미지 파일을 저장
         try {
-
             // 원래 파일 이름과 확장자 추출
             String originalFilename = file.getOriginalFilename();
             String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-
             // UUID 생성
             String uuid = UUID.randomUUID().toString();
 
             // UUID를 파일 이름에 붙여 새로운 파일 이름 생성
-            String newFileName = uuid + fileExtension;
+            String newFileName = uuid + fileExtension+"_" + originalFilename;
+            imgCVFile.setFile_name(newFileName);
+            imgCVFile.setFile_type(fileExtension);
             String savePath = uploadPath + File.separator + newFileName;
+            imgCVFile.setPath(savePath);
+            cvService.createImageFile(imgCVFile);
             file.transferTo(new File(savePath));
             return ResponseEntity.ok(newFileName);
         } catch (IOException e) {
@@ -82,6 +90,7 @@ CVController {
         CV cv = new CV();
         cv.setCv_no(cv_no);
         cv.setUser_id(loginUSer.getUser_id());
+
 //        log.info(cvService.findAll(Integer.parseInt(request.getParameter("cv_no"))).toString());
         return ResponseEntity.ok(cvService.findAll(cv));
     }
@@ -96,18 +105,31 @@ CVController {
         cv.setUser_phone(loginUSer.getUser_phone());
         cv.setUser_birth(loginUSer.getUser_birth());
 
+
         log.info("Init Profile Setting : "+ cv);
         return ResponseEntity.ok(cv);
     }
+    @GetUserAccessToken
+    @GetMapping("/get-cv-no")
+    public ResponseEntity<Object> getCVNO(Users loginUSer,@RequestParam("job_posting_no") int job_posting_no){
+
+        CV cv = new CV();
+        cv.setUser_id(loginUSer.getUser_id());
+        cv.setJob_posting_no(job_posting_no);
+        int result = cvService.findCVNO(cv);
+
+        return ResponseEntity.ok(result);
+    }
+
 
     @PostMapping
-    public ResponseEntity<Object> CVCrate(@RequestBody Map<String,Object> requestBody){
+    public ResponseEntity<Integer> CVCrate(@RequestBody Map<String,Object> requestBody){
         log.info("Req Data : "+requestBody.toString());
         ObjectMapper mapper = new ObjectMapper();
         CV cv = mapper.convertValue(requestBody.get("cv"),CV.class);
         log.info("CV Data: " + cv);
-        cvService.create(cv);
-        return ResponseEntity.ok("Connect");
+        int cv_no = cvService.create(cv);
+        return ResponseEntity.status(HttpStatus.OK).body(cv_no);
     }
 
     @PutMapping

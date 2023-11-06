@@ -7,6 +7,7 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface CVMapper {
     public CV selectCVList(CV cv);
+    public int selectCVNO (CV cv);
 
     //========================CV Create Part===========================
     public int insertCV(CV cv);

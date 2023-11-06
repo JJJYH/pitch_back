@@ -30,6 +30,18 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
+    public ResponseEntity<Object> createImageFile(CVFile imgCVFile) {
+        log.info("ImgCVFile Is : "+imgCVFile);
+        cvMapper.insertCVFile(imgCVFile);
+        return ResponseEntity.ok("이미지 파일이 성공적으로 업로드되었습니다.");
+    }
+
+    @Override
+    public int findCVNO(CV cv) {
+        return cvMapper.selectCVNO(cv);
+    }
+
+    @Override
     @Transactional
     public String modify(CV cv) {
         //CV update
@@ -43,6 +55,10 @@ public class CVServiceImpl implements CVService {
                     activity.setUser_id(cv.getUser_id());
                     log.info("CV DATA IS UPDATE(Activity) : " + activity.toString());
                     cvMapper.updateActivity(activity);
+                    if(activity.getActivity_no() ==0){
+                        log.info("기존에 작성된 대외활동이 없으므로 post 요청 보냅니다.");
+                        cvMapper.insertActivity(activity);
+                    }
                 });
 
         //Advantage insert
@@ -54,6 +70,10 @@ public class CVServiceImpl implements CVService {
                     advantage.setUser_id(cv.getUser_id());
                     log.info("CV DATA IS UPDATE(Advantage) : " + advantage.toString());
                     cvMapper.updateAdvantage(advantage);
+                    if(advantage.getAdvantage_no() ==0){
+                        log.info("기존에 작성된 우대사항이 없으므로 post 요청 보냅니다.");
+                        cvMapper.insertAdvantage(advantage);
+                    }
                 });
 
         //Career insert
@@ -65,6 +85,10 @@ public class CVServiceImpl implements CVService {
                     career.setUser_id(cv.getUser_id());
                     log.info("CV DATA IS UPDATE(Career) : " + career.toString());
                     cvMapper.updateCareer(career);
+                    if(career.getCareer_no() ==0){
+                        log.info("기존에 작성된 경력사항이 없으므로 post 요청 보냅니다.");
+                        cvMapper.insertCareer(career);
+                    }
                 });
 
         //Certification insert
@@ -75,6 +99,10 @@ public class CVServiceImpl implements CVService {
                     certification.setUser_id(cv.getUser_id());
                     log.info("CV DATA IS UPDATE(certification) : " + certification.toString());
                     cvMapper.updateCertification(certification);
+                    if(certification.getCert_no() ==0){
+                        log.info("기존에 작성된 자격증이 없으므로 post 요청 보냅니다.");
+                        cvMapper.insertCertification(certification);
+                    }
                 });
 
         //CVFile insert
@@ -99,6 +127,10 @@ public class CVServiceImpl implements CVService {
                     language.setCv_no(cv.getCv_no());
                     language.setUser_id(cv.getUser_id());
                     cvMapper.updateLanguage(language);
+                    if(language.getLanguage_no() ==0){
+                        log.info("기존에 작성된 어학성적이 없으므로 post 요청 보냅니다.");
+                        cvMapper.insertLanguage(language);
+                    }
                 });
 
         //Skill insert
@@ -108,13 +140,17 @@ public class CVServiceImpl implements CVService {
                     skill.setCv_no(cv.getCv_no());
                     skill.setUser_id(cv.getUser_id());
                     cvMapper.updateSkill(skill);
+                    if(skill.getSkill_no() ==0){
+                        log.info("기존에 작성된 보유기술이 없으므로 post 요청 보냅니다.");
+                        cvMapper.insertSkill(skill);
+                    }
                 });
         return "";
     }
 
     @Override
     @Transactional
-    public String create(CV cv) {
+    public int create(CV cv) {
 
         //CV insert
         cvMapper.insertCV(cv);
@@ -188,7 +224,7 @@ public class CVServiceImpl implements CVService {
                     cvMapper.insertSkill(skill);
                 });
 
-        return "";
+        return cv.getCv_no();
     }
 
     public List<CVFile> convertToCVFiles(MultipartFile[] files, String uploadPath, int cv_no, String user_id) {
@@ -237,7 +273,7 @@ public class CVServiceImpl implements CVService {
 
         try {
             // 원하는 경로
-            String uploadPath = "C:\\DouZone\\workspace\\react_work\\pitch_frontend\\public\\" + endPath;
+            String uploadPath = "C:\\pitch_resorces\\" + endPath;
 
             // 파일을 업로드할 경로 생성
             File folder = new File(uploadPath);
@@ -276,4 +312,6 @@ public class CVServiceImpl implements CVService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 중 오류가 발생했습니다.");
         }
     }
+
+
 }

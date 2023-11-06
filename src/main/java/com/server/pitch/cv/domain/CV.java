@@ -16,6 +16,7 @@ public class CV {
     //기본 테이블 정보
     private int cv_no;
     private String user_id;
+    private int job_posting_no;
 
     private String ps_statement;
     private String gender;
