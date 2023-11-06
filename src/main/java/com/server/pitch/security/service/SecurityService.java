@@ -5,6 +5,8 @@ import com.server.pitch.security.domain.RefreshToken;
 import com.server.pitch.users.domain.Users;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.io.UnsupportedEncodingException;
+
 public interface SecurityService extends UserDetailsService {
     public Users findByEmail(String user_email);
     public Users findById(String user_id);
@@ -14,7 +16,7 @@ public interface SecurityService extends UserDetailsService {
 
     public void socialLogin(String code);
 
-    public String getAccessToken(String authorizationCode);
+    public String getAccessToken(String authorizationCode) throws UnsupportedEncodingException;
 
     public JsonNode getUserResource(String accessToken);
 
@@ -34,5 +36,9 @@ public interface SecurityService extends UserDetailsService {
     public RefreshToken updateRedisHashToken(String token);
 
     public void logoutByAccessToken(String accessToken);
+
+    public boolean cheackUserByGoogleEmail(String email);
+
+    public String loginGoogleEmail(String email);
 
 }
