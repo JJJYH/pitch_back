@@ -1,8 +1,10 @@
 package com.server.pitch.hire.controller;
 
+import com.server.pitch.hire.domain.Interviewer;
 import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.domain.JobReqList;
 import com.server.pitch.hire.service.JobReqService;
+import com.server.pitch.users.domain.Users;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.web.bind.annotation.*;
@@ -65,4 +67,19 @@ public class JobReqController {
        log.info(searchParams.toString());
         return jobReqService.combinedSearchByThings(searchParams);
     }
+
+    @GetMapping("/deptusers")
+    public List<Users> deptUsersAll(){
+       return jobReqService.findUserWithDept();
+    }
+
+    @PutMapping ("/addInterviewers/{job_req_no}")
+    public void addInterviewersToJobReq(@RequestBody Interviewer interviewer) {
+        JobReq jobReq = interviewer.getJobReq();
+        List<String> interviewer_id = interviewer.getInterviewer_id();
+        jobReqService.addInterviewersToJobReq(jobReq, interviewer_id);
+
+    }
+
+
 }
