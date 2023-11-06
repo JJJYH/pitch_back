@@ -69,6 +69,18 @@
                  JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
     </select>
 
+    <insert id="insertLiked" parameterType="Liked">
+        INSERT INTO liked (job_posting_no, user_id)
+        VALUES (#{job_posting_no}, #{user_id})
+    </insert>
+
+    <delete id="deleteLiked">
+        DELETE FROM liked WHERE job_posting_no = #{job_posting_no} AND user_id = #{user_id}
+    </delete>
+
+    <select id="selectLikedByUserId" parameterType="string" resultType="Liked">
+        SELECT * FROM liked WHERE user_id = #{user_id}
+    </select>
 
 
 </mapper>

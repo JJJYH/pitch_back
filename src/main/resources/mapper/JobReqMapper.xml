@@ -80,7 +80,7 @@
          INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_role, location, hire_num, education, job_type,
                         job_year, posting_type, posting_period, posting_start, posting_end, qualification, preferred,
                         job_duties, req_status)
-         VALUES (#{job_req_no}, 'hr', #{req_title}, #{job_req_date}, #{job_role}, #{location}, #{hire_num}, #{education},
+         VALUES (#{job_req_no}, #{users.user_id}, #{req_title}, #{job_req_date}, #{job_role}, #{location}, #{hire_num}, #{education},
                 #{job_type}, #{job_year}, #{posting_type}, #{posting_period}, #{posting_start}, #{posting_end},
                  #{qualification}, #{preferred}, #{job_duties}, #{req_status})
 

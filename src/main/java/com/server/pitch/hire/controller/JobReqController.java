@@ -1,5 +1,6 @@
 package com.server.pitch.hire.controller;
 
+import com.server.pitch.aop.GetUserAccessToken;
 import com.server.pitch.hire.domain.Interviewer;
 import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.domain.JobReqList;
@@ -38,10 +39,11 @@ public class JobReqController {
        return jobReqService.findByNo(job_req_no);
    }
 
+   @GetUserAccessToken
    @PostMapping("/create")
-    public int jobReqCreate(@RequestBody JobReq jobReq){
+    public int jobReqCreate(@RequestBody JobReq jobReq, Users loginUser){
        log.info(jobReq.toString());
-
+       jobReq.setUsers(loginUser);
        return jobReqService.createJobReq(jobReq);
    }
 
