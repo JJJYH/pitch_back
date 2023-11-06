@@ -7,6 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/admin/hire")
 @AllArgsConstructor
@@ -19,5 +21,10 @@ public class JobPostingController {
         log.info(jobPosting.toString());
         jobPostingService.createJobPostingAndUpdateJobReqStatus(jobPosting);
 
+    }
+
+    @GetMapping("/getJobPostingList")
+    public List<JobPosting> jobPostingAll(){
+        return jobPostingService.findJobPostingAll();
     }
 }

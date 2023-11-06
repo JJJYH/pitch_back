@@ -63,6 +63,12 @@
         WHERE job_req_no = #{job_req_no}
     </update>
 
+    <select id="selectJobPostingList" resultMap="JobPostingMap">
+        SELECT jp.*, jr.*
+        FROM jobposting jp
+                 JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
+    </select>
+
 
 
 </mapper>

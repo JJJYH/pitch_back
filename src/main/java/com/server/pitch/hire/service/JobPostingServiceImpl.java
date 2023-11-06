@@ -7,6 +7,8 @@ import com.server.pitch.hire.mapper.JobReqMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class JobPostingServiceImpl implements JobPostingService{
@@ -24,6 +26,11 @@ public class JobPostingServiceImpl implements JobPostingService{
         jobPostingMapper.insertJobPosting(jobPosting);
         jobPostingMapper.updateJobReqStatus(jobPosting.getJobReq());
 
+    }
+
+    @Override
+    public List<JobPosting> findJobPostingAll() {
+        return jobPostingMapper.selectJobPostingList();
     }
 
 }
