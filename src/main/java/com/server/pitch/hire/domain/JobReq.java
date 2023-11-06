@@ -1,5 +1,6 @@
 package com.server.pitch.hire.domain;
 
+import com.server.pitch.users.domain.Department;
 import com.server.pitch.users.domain.Users;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class JobReq {
     private String job_type;
     private String job_year;
     private String posting_type;
+    private String posting_period;
     private Date posting_start;
     private Date posting_end;
     private String qualification;
@@ -31,4 +33,5 @@ public class JobReq {
     private String req_status;
 
     private Users users;
+    private Department department;
 }

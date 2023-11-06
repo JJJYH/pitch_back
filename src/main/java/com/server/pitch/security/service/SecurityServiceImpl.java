@@ -22,6 +22,9 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -194,12 +197,12 @@ public class SecurityServiceImpl implements SecurityService{
     }
 
     @Override
-    public String getAccessToken(String authorizationCode) {
+    public String getAccessToken(String authorizationCode) throws UnsupportedEncodingException {
         String clientId = env.getProperty("oauth2.google.client-id");
         String clientSecret = env.getProperty("oauth2.google.client-secret");
         String redirectUri = env.getProperty("oauth2.google.redirect-uri");
         String tokenUri = env.getProperty("oauth2.google.token-uri");
-
+        authorizationCode = URLDecoder.decode(authorizationCode, StandardCharsets.UTF_8.name());
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         log.info(clientId);
         log.info(clientSecret);
@@ -218,7 +221,7 @@ public class SecurityServiceImpl implements SecurityService{
         log.info("1");
         ResponseEntity<JsonNode> responseNode = restTemplate.exchange(tokenUri, HttpMethod.POST, entity, JsonNode.class);
         JsonNode accessTokenNode = responseNode.getBody();
-        System.out.println(accessTokenNode);
+        log.info(accessTokenNode.toString());
         return accessTokenNode.get("access_token").asText();
     }
 
@@ -226,12 +229,12 @@ public class SecurityServiceImpl implements SecurityService{
     public JsonNode getUserResource(String accessToken) {
         String authUri = env.getProperty("oauth2.google.auth-uri");
 
-        System.out.println(accessToken);
+        log.info("1."+accessToken);
         HttpHeaders headers = new HttpHeaders();
-        System.out.println(accessToken);
+        log.info("2."+accessToken);
         headers.set("Authorization", "Bearer "+accessToken);
         HttpEntity entity = new HttpEntity(headers);
-        System.out.println(headers);
+        log.info("3."+headers.toString());
         return restTemplate.exchange(authUri, HttpMethod.GET, entity, JsonNode.class).getBody();
     }
 
@@ -247,6 +250,38 @@ public class SecurityServiceImpl implements SecurityService{
         redisTokenRepository.save(new RefreshToken(refreshToken, user_id, accessToken));
     }
 
+    @Override
+    public boolean cheackUserByGoogleEmail(String email) {
+        Users users = findByEmail(email);
+        return users != null;
+    }
 
+    @Override
+    public String loginGoogleEmail(String email) {
+        Users user = findByEmail(email);
+        log.info(user.getUser_id());
+        log.info(user.getUser_nm());
 
+        String accessToken = Jwts.builder()
+                .setSubject(user.getUser_id())
+                .setExpiration(new Date(System.currentTimeMillis()+
+                        Long.parseLong(env.getProperty("token.expiration_time"))))
+                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.asecret"))
+                .compact();
+
+        String refreshToken = Jwts.builder()
+                .setSubject(accessToken)
+                .setExpiration(new Date(System.currentTimeMillis()+
+                        Long.parseLong(env.getProperty("token.refreshToken_time"))))
+                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.rsecret"))
+                .compact();
+
+        log.info(accessToken);
+        log.info(refreshToken);
+
+        saveToken(refreshToken, user.getUser_id(), accessToken);
+        //securityRepository.save(accessToken, refreshToken);
+
+        return accessToken;
+    }
 }

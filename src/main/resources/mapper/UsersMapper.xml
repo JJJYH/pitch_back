@@ -38,7 +38,7 @@
 
     <insert id="insertUser">
         insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth)
-        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, #{user_birth})
+        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'))
     </insert>
 
 

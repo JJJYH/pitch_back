@@ -4,17 +4,17 @@ import com.server.pitch.aop.GetUserAccessToken;
 import com.server.pitch.users.domain.Users;
 import com.server.pitch.users.service.UsersService;
 import com.server.pitch.security.repository.SecurityRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/admin")
 public class UsersController {
@@ -39,9 +39,9 @@ public class UsersController {
 
     @GetUserAccessToken
     @GetMapping("/loginUserTest")
-    public void test2(Users loginUser){
-        //Users loginUser = (Users) session.getAttribute("loginUser");
-        System.out.println(loginUser);
+    public void test2(Users loginUser, @RequestBody Map<String, Object> test){
+        log.info("사용자 정보 : "+loginUser.toString());
+        log.info("Request args 정보 : "+test.toString());
     }
 
     @PostMapping("/test")

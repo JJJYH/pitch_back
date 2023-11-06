@@ -17,6 +17,7 @@
         <result property="job_type" column="job_type"/>
         <result property="job_year" column="job_year"/>
         <result property="posting_type" column="posting_type"/>
+        <result property="posting_period" column="posting_period"/>
         <result property="posting_start" column="posting_start"/>
         <result property="posting_end" column="posting_end"/>
         <result property="qualification" column="qualification"/>
@@ -25,7 +26,7 @@
         <result property="req_status" column="req_status"/>
 
         <!-- Users 객체 매핑 -->
-        <collection property="users" ofType="Users">
+        <collection property="users" javaType="Users">
             <id property="user_id" column="user_id"/>
             <result property="user_email" column="user_email"/>
             <result property="user_pw" column="user_pw"/>
@@ -33,6 +34,12 @@
             <result property="role" column="role"/>
             <result property="user_phone" column="user_phone"/>
             <result property="user_birth" column="user_birth"/>
+        </collection>
+
+        <collection property="department" javaType="Department">
+            <id property="dept_no" column="dept_no"/>
+            <result property="dept_name" column="dept_name"/>
+            <result property="max_num" column="max_num"/>
         </collection>
     </resultMap>
 
@@ -71,10 +78,10 @@
         </selectKey>
 
          INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_role, location, hire_num, education, job_type,
-                        job_year, posting_type, posting_start, posting_end, qualification, preferred,
+                        job_year, posting_type, posting_period, posting_start, posting_end, qualification, preferred,
                         job_duties, req_status)
          VALUES (#{job_req_no}, 'hr', #{req_title}, #{job_req_date}, #{job_role}, #{location}, #{hire_num}, #{education},
-                #{job_type}, #{job_year}, #{posting_type}, #{posting_start}, #{posting_end},
+                #{job_type}, #{job_year}, #{posting_type}, #{posting_period}, #{posting_start}, #{posting_end},
                  #{qualification}, #{preferred}, #{job_duties}, #{req_status})
 
     </insert>
@@ -101,6 +108,7 @@
             job_type = #{job_type},
             job_year = #{job_year},
             posting_type = #{posting_type},
+            posting_period = #{posting_period},
             posting_start = #{posting_start},
             posting_end = #{posting_end},
             qualification = #{qualification},
@@ -119,7 +127,7 @@
         WHERE u.role = 'hr'
         <if test="searchKeyword != null and searchKeyword != ''">
             AND (j.req_title LIKE CONCAT('%', #{searchKeyword}, '%')
-            OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))
+                 OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))
         </if>
         <if test="startDate != null and endDate != null">
             AND j.job_req_date BETWEEN #{startDate} AND date_add(#{endDate}, Interval 1 day)
@@ -134,9 +142,17 @@
     </select>
 
 
+    <select id="selectUserWithDept" resultMap="JobReqMap">
+        SELECT u.*, d.*
+        FROM users u
+                 JOIN department d ON u.dept_no = d.dept_no
+        WHERE u.role = 'hr'
+    </select>
 
-
-
+    <insert id="insertInterviewer">
+        INSERT INTO interviewer (job_req_no, user_id)
+        VALUES (#{job_req_no}, #{interviewer_id})
+    </insert>
 
 
 
