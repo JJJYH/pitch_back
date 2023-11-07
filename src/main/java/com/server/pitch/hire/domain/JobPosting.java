@@ -18,4 +18,6 @@ public class JobPosting {
     private JobReq jobReq;
     private Users users;
     private Department department;
+
+    private boolean isLiked;
 }
