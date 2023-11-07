@@ -3,6 +3,10 @@ package com.server.pitch.sort.service;
 import com.server.pitch.sort.config.EmailConfig;
 import com.server.pitch.sort.domain.*;
 import com.server.pitch.sort.mapper.SortMapper;
+import com.server.pitch.sort.utils.ScoreCalculator;
+import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
+import kr.co.shineware.nlp.komoran.core.Komoran;
+import kr.co.shineware.nlp.komoran.model.KomoranResult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,10 +14,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
@@ -30,6 +31,77 @@ public class SortServiceImpl implements SortService{
 
     ExecutorService executorService = Executors.newFixedThreadPool(10);
 
+    Komoran nlp = null;
+
+    public SortServiceImpl() {
+        this.nlp = new Komoran(DEFAULT_MODEL.LIGHT);
+    }
+
+    @Override
+    public List<String> doWordNouns(String text) throws Exception {
+
+        String replace_text = text.replace("[^가-힣a-zA-Z0-9", " ");
+        String trim_text = replace_text.trim();
+
+
+        KomoranResult analyzeResultList = this.nlp.analyze(trim_text);
+        List<String> rList = analyzeResultList.getNouns();
+
+        if (rList == null) {
+            rList = new ArrayList<String>();
+        }
+
+        Iterator<String> it = rList.iterator();
+
+        while (it.hasNext()) {
+            String word = it.next();
+        }
+
+        return rList;
+    }
+
+    @Override
+    public List<Map<String, Object>> doWordCount(List<String> pList) throws Exception {
+
+        if (pList ==null) {
+            pList = new ArrayList<String>();
+        }
+
+
+        Set<String> rSet = new HashSet<String>(pList);
+        Iterator<String> it = rSet.iterator();
+        List<Map<String, Object>> rList = new ArrayList<>();
+
+        while(it.hasNext()) {
+            Map<String, Object> rMap = new HashMap<>();
+            String word = it.next();
+            int frequency = Collections.frequency(pList, word);
+
+            rMap.put("text", word);
+            rMap.put("value", frequency);
+            rList.add(rMap);
+        }
+
+        return rList;
+    }
+
+    @Override
+    public List<Map<String, Object>> doWordAnalysis(String text) throws Exception {
+
+        List<String> pList = this.doWordNouns(text);
+
+        if(pList == null) {
+            pList = new ArrayList<String>();
+        }
+
+        List<Map<String, Object>> rList = this.doWordCount(pList);
+
+        if(rList == null) {
+            rList = new ArrayList<>();
+        }
+
+        return rList;
+    }
     @Override
     public List<ApplicantResponse> findAll(ApplicantRequest req) {
         return mapper.selectSortList(req);
@@ -38,6 +110,19 @@ public class SortServiceImpl implements SortService{
     @Override
     public ApplicantDetailResponse findOne(int applyNo) {
         return mapper.selectApplicant(applyNo);
+    }
+
+    @Override
+    public List<ApplicantDetailResponse> findAllFilteredApplicant(int postingNo, FilterRequest filter) {
+        List<ApplicantDetailResponse> list = mapper.selectFilteredApplicant(postingNo);
+
+        for(ApplicantDetailResponse applicant : list) {
+            log.info(applicant);
+            ScoreCalculator.calculateScore(filter, applicant);
+            log.info(applicant);
+        }
+
+        return list;
     }
 
     @Override
@@ -171,8 +256,8 @@ public class SortServiceImpl implements SortService{
                     );
 
                     message.setSubject("[" + companyName +"]" + statusType + "발표 안내드립니다.");
-                    message.setText(template);
-
+//                    message.setText(template);
+                    message.setContent(template, "text/html; charset=utf-8");
                     Transport.send(message);
 
                 } catch (MessagingException e) {
