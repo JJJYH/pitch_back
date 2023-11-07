@@ -60,5 +60,4 @@ public class CommonAspect {
         return joinPoint.proceed(getArgs);
     }
 
-
 }
