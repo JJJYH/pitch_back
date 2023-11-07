@@ -1,7 +1,6 @@
 package com.server.pitch.security.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.server.pitch.aop.GetUserAccessToken;
 import com.server.pitch.security.service.SecurityService;
 import com.server.pitch.users.domain.Users;
 import io.jsonwebtoken.Claims;
@@ -14,10 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -40,13 +36,17 @@ public class SecurityController {
     @GetMapping("/login-user")
     public ResponseEntity<Users> getLoginUserInfo(@RequestParam String token){
         log.info(token);
-
-        Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
-        String user_id = claims.getSubject();
-        Users loginUser = securityService.findById(user_id);
-        log.info(loginUser.toString());
-        loginUser.setUser_pw(null);
-        return ResponseEntity.status(HttpStatus.CREATED).body(loginUser);
+        Users loginUser = null;
+        if(securityService.checkedAccessTokenValid(token)) {
+            Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
+            String user_id = claims.getSubject();
+            loginUser = securityService.findById(user_id);
+            log.info(loginUser.toString());
+            loginUser.setUser_pw(null);
+            return ResponseEntity.status(HttpStatus.CREATED).body(loginUser);
+        }else{
+            return null;
+        }
     }
 
     @PostMapping("/logout")
@@ -58,10 +58,26 @@ public class SecurityController {
 
     @PostMapping("/create")
     public ResponseEntity<Users> accountCreate(@RequestBody Users user){
-
         log.info(user.toString());
         securityService.createUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
+    }
+
+    @PostMapping("/create-hr")
+    public ResponseEntity<Users> hrAccountCreate(@RequestBody Users users){
+        log.info("=============등록=============");
+        log.info(users.toString());
+        users.setUser_pw("1234");
+        securityService.createHrAccount(users);
+        return ResponseEntity.status(HttpStatus.CREATED).body(users);
+    }
+
+    @PutMapping("/update-hr")
+    public ResponseEntity<Users> hrAccountModify(@RequestBody Users users){
+        log.info("================수정================");
+        log.info(users.toString());
+        securityService.modifyHrAccount(users);
+        return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
     @GetMapping("/google")

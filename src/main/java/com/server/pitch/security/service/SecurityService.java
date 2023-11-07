@@ -11,6 +11,8 @@ public interface SecurityService extends UserDetailsService {
     public Users findByEmail(String user_email);
     public Users findById(String user_id);
     public Users createUser(Users user);
+    public Users createHrAccount(Users user);
+    public Users modifyHrAccount(Users user);
 
     public void saveToken(String refreshToken, String user_id, String accessToken);
 

@@ -43,20 +43,22 @@ public class TokenFilter extends BasicAuthenticationFilter {
         }
         String token = request.getHeader("Authorization").substring(7);
         log.info(token);
-        if(!securityService.checkedRefreshTokenByAccessToken(token)){
+        if(!securityService.checkedAccessTokenValid(token)||!securityService.checkedRefreshTokenByAccessToken(token)){
             onError(response, "AccessToken is not valid");
-        }
-        Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
-        String userID = claims.getSubject();
+        }else{
+            Claims claims = Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token).getBody();
+            String userID = claims.getSubject();
 
-        Users user = securityService.findById(userID);
-        ArrayList<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        if(user.getRole()!=null) {
-            grantedAuthorities.add(new SimpleGrantedAuthority(user.getRole()));
+            Users user = securityService.findById(userID);
+            ArrayList<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+            if(user.getRole()!=null) {
+                grantedAuthorities.add(new SimpleGrantedAuthority(user.getRole()));
+            }
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(user.getUser_email(), null, grantedAuthorities);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        Authentication authentication =
-                new UsernamePasswordAuthenticationToken(user.getUser_email(), null, grantedAuthorities);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         chain.doFilter(request,response);
 
     }
