@@ -7,7 +7,14 @@
 
 <!--SELECT QUERY-->
     <select id="selectCVNO" resultType="int">
-        SELECT cv_no from cv
+        SELECT cv_no FROM cv
+        WHERE job_posting_no = #{job_posting_no}
+    </select>
+
+    <select id="selectPosition" resultType="String">
+        SELECT job_role
+        FROM jobposting AS a LEFT JOIN  jobreq AS b
+            ON a.job_req_no = b.job_req_no
         WHERE job_posting_no = #{job_posting_no}
     </select>
 

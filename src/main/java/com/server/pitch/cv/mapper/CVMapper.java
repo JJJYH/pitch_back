@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 public interface CVMapper {
     public CV selectCVList(CV cv);
     public int selectCVNO (CV cv);
-
+    public String selectPosition(int job_posting_no);
     //========================CV Create Part===========================
     public int insertCV(CV cv);
     public int insertActivity(Activity activity);

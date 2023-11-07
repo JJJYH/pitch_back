@@ -30,6 +30,11 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
+    public String findPosition(int job_posting_no) {
+        return cvMapper.selectPosition(job_posting_no);
+    }
+
+    @Override
     public ResponseEntity<Object> createImageFile(CVFile imgCVFile) {
         log.info("ImgCVFile Is : "+imgCVFile);
         cvMapper.insertCVFile(imgCVFile);

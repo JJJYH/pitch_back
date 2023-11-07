@@ -95,6 +95,12 @@ CVController {
         return ResponseEntity.ok(cvService.findAll(cv));
     }
 
+    @GetMapping("/find-position")
+    public ResponseEntity<Object> getPosition(@RequestParam("job_posting_no") int job_posting_no){
+        String position = cvService.findPosition(job_posting_no);
+        return ResponseEntity.ok(position);
+    }
+
     @GetUserAccessToken
     @GetMapping("/init-cv")
     public ResponseEntity<Object> InitCV(Users loginUSer){

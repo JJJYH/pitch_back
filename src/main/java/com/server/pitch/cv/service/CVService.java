@@ -14,6 +14,7 @@ public interface CVService {
 
     public int create(CV cv);
 
+    public String findPosition(int job_posting_no);
     public ResponseEntity<Object> createImageFile(CVFile imgCVFile);
 
     public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath,int cv_no,String user_id);
