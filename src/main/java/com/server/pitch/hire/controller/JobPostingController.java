@@ -26,9 +26,14 @@ public class JobPostingController {
 
     }
 
+//    @GetMapping("/getJobPostingList")
+//    public List<JobPosting> jobPostingAll(){
+//        return jobPostingService.findJobPostingAll();
+//    }
+
     @GetMapping("/getJobPostingList")
-    public List<JobPosting> jobPostingAll(){
-        return jobPostingService.findJobPostingAll();
+    public List<JobPosting> jobPostingAll(@RequestParam(name = "orderType", required = false) String orderType){
+        return jobPostingService.findJobPostingAll(orderType);
     }
 
     @GetUserAccessToken

@@ -29,10 +29,17 @@ public class JobPostingServiceImpl implements JobPostingService{
 
     }
 
+//    @Override
+//    public List<JobPosting> findJobPostingAll() {
+//        return jobPostingMapper.selectJobPostingList();
+//    }
+
     @Override
-    public List<JobPosting> findJobPostingAll() {
-        return jobPostingMapper.selectJobPostingList();
+    public List<JobPosting> findJobPostingAll(String orderType) {
+        return jobPostingMapper.selectJobPostingList(orderType);
     }
+
+
 
     @Override
     public void createLiked(Liked liked) {

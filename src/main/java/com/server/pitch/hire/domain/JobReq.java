@@ -17,6 +17,7 @@ public class JobReq {
     private int job_req_no;
     private String req_title;
     private Date job_req_date;
+    private String job_group;
     private String job_role;
     private String location;
     private int hire_num;

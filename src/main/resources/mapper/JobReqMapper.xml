@@ -10,6 +10,7 @@
         <id property="job_req_no" column="job_req_no"/>
         <result property="req_title" column="req_title"/>
         <result property="job_req_date" column="job_req_date"/>
+        <result property="job_group" column="job_group"/>
         <result property="job_role" column="job_role"/>
         <result property="location" column="location"/>
         <result property="hire_num" column="hire_num"/>
@@ -77,10 +78,10 @@
             SELECT nextval(job_req_seq)
         </selectKey>
 
-         INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_role, location, hire_num, education, job_type,
+         INSERT INTO jobreq (job_req_no, user_id, req_title, job_req_date, job_group, job_role, location, hire_num, education, job_type,
                         job_year, posting_type, posting_period, posting_start, posting_end, qualification, preferred,
                         job_duties, req_status)
-         VALUES (#{job_req_no}, #{users.user_id}, #{req_title}, #{job_req_date}, #{job_role}, #{location}, #{hire_num}, #{education},
+         VALUES (#{job_req_no}, #{users.user_id}, #{req_title}, #{job_req_date}, #{job_group}, #{job_role}, #{location}, #{hire_num}, #{education},
                 #{job_type}, #{job_year}, #{posting_type}, #{posting_period}, #{posting_start}, #{posting_end},
                  #{qualification}, #{preferred}, #{job_duties}, #{req_status})
 
@@ -101,6 +102,7 @@
         UPDATE jobreq
         SET
             req_title = #{req_title},
+            job_group = #{job_group},
             job_role = #{job_role},
             location = #{location},
             hire_num = #{hire_num},
