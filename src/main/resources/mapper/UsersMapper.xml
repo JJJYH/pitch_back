@@ -20,8 +20,28 @@
         </collection>
     </resultMap>
 
-    <select id="list" resultType="Users">
-        select user_id, user_pw, user_nm, role from users
+<!--    <select id="list" resultType="Users">-->
+<!--        select user_id, user_pw, user_nm, role from users-->
+<!--    </select>-->
+
+    <select id="list" resultMap="userMap">
+        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name from users u
+        left join department d on d.dept_no = u.dept_no
+    </select>
+
+    <select id="hrList" resultMap="userMap">
+        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name from users u
+        left join department d on d.dept_no = u.dept_no
+        where role = 'HR'
+    </select>
+
+    <select id="deptList" resultType="Department">
+        select dept_no, dept_name, max_num from department
+    </select>
+
+    <select id="selectDept" resultType="Department">
+        select dept_no, dept_name, max_num from department
+        where dept_nme = #{dept_name}
     </select>
 
     <select id="selectUser" resultMap="userMap">
@@ -37,9 +57,14 @@
     </select>
 
     <insert id="insertUser">
-        insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth)
-        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'))
+        insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth, dept_no, role)
+        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role})
     </insert>
+
+    <update id="updateHr">
+        update users set user_nm = #{user_nm},user_email = #{user_email}, user_phone = #{user_phone}, role = #{role} , dept_no = #{dept_no}
+                     where user_id = #{user_id}
+    </update>
 
 
 </mapper>
