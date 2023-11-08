@@ -41,7 +41,7 @@ CVController {
         imgCVFile.setUser_id(loginUSer.getUser_id());
         imgCVFile.setFile_size((int)file.getSize());
         imgCVFile.setUpload_date(new Date(System.currentTimeMillis()));
-
+        imgCVFile.setType("images");
 
         // 해당 경로에 디렉토리가 없다면 생성
         File folder = new File(uploadPath);

@@ -95,6 +95,16 @@ public class SecurityServiceImpl implements SecurityService{
     }
 
     @Override
+    public Users createHrAccount(Users user) {
+        user.setUser_pw(passwordEncoder.encode((user.getUser_pw())));
+        if(user.getDepartment().getDept_name()!=null) {
+            user.setDepartment(usersMapper.selectDept(user.getDepartment().getDept_name()));
+        }
+        usersMapper.insertUser(user);
+        return null;
+    }
+
+    @Override
     public String createAccessToken(String user_id) {
         return Jwts.builder()
                 .setSubject(user_id)
@@ -120,15 +130,15 @@ public class SecurityServiceImpl implements SecurityService{
             Jwts.parser().setSigningKey("jwtAccess").parseClaimsJws(token);
             return true;
         }catch (SignatureException e){
-            log.error("Invalid JWT Signature: {}", e.getMessage());
+            //log.error("Invalid JWT Signature: {}", e.getMessage());
         }catch (MalformedJwtException e){
-            log.error("Invalid Access Token: {}", e.getMessage());
+            //log.error("Invalid Access Token: {}", e.getMessage());
         }catch (ExpiredJwtException e){
-            log.error("Access Token is Expired: {}", e.getMessage());
+            //log.error("Access Token is Expired: {}", e.getMessage());
         }catch (UnsupportedJwtException e){
-            log.error("This Token is unsupported: {}", e.getMessage());
+            //log.error("This Token is unsupported: {}", e.getMessage());
         }catch (IllegalArgumentException e){
-            log.error("JWT claims string is empty: {}", e.getMessage());
+            //log.error("JWT claims string is empty: {}", e.getMessage());
         }
         return false;
     }
@@ -283,5 +293,14 @@ public class SecurityServiceImpl implements SecurityService{
         //securityRepository.save(accessToken, refreshToken);
 
         return accessToken;
+    }
+
+    @Override
+    public Users modifyHrAccount(Users user) {
+        if(user.getDepartment().getDept_name()!=null) {
+            user.setDepartment(usersMapper.selectDept(user.getDepartment().getDept_name()));
+        }
+        usersMapper.updateHr(user);
+        return user;
     }
 }
