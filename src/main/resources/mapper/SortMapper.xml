@@ -60,10 +60,12 @@
             sub3_score,
             sub4_score,
             sub5_score,
-            user_id,
+            e.user_id,
+            user_nm,
             note
-        FROM candidate_eval
+        FROM candidate_eval e, users u
         WHERE apply_no = #{apply_no}
+        AND e.user_id = u.user_id
     </select>
 
     <!-- 지원자 합격/불합격 처리 쿼리 -->
@@ -116,7 +118,7 @@
             jr.posting_end
     </select>
 
-<!--     지원자 상세 정보를 조회하는 쿼리-->
+    <!-- 지원자 상세 정보를 조회하는 쿼리 -->
     <select id="selectApplicant" resultMap="applicantDetailResponseResultMap">
         SELECT
             a.apply_no,
@@ -134,7 +136,26 @@
             a.apply_no = #{applyNo}
     </select>
 
-    <!-- 지원자 목록 조회를 위한 resultmap-->
+    <!-- 선별된 지원자 목록을 조회하는 쿼리 -->
+    <select id="selectFilteredApplicant" resultMap="applicantDetailResponseResultMap" parameterType="int">
+        SELECT
+            a.apply_no,
+            a.applicant_status,
+            a.apply_date,
+            a.read_status,
+            a.status_type,
+            a.note,
+            cv.*
+        FROM
+            apply a
+                JOIN
+            cv_data_view cv ON a.cv_no = cv.cv_no
+        WHERE a.applicant_status = 'first'
+        AND a.status_type = '평가전'
+        AND a.job_posting_no = #{postingNo}
+    </select>
+
+    <!-- 지원자 상세 조회를 위한 resultmap -->
     <resultMap id="applicantDetailResponseResultMap" type="ApplicantDetailResponse">
         <id property="apply_no" column="apply_no" />
         <result property="applicant_status" column="applicant_status" />
@@ -147,6 +168,7 @@
             <result property="job_req_no" column="job_req_no" />
             <result property="sub1_score" column="sub1_score" />
             <result property="sub2_score" column="sub2_score" />
+            <result property="user_nm" column="user_nm" />
             <result property="note" column="note" />
         </collection>
     </resultMap>
@@ -199,7 +221,7 @@
         <result property="company_name" column="company_name"/>
         <result property="cv_dept_name" column="cv_dept_name"/>
         <result property="join_date" column="join_date"/>
-        <!--        <result property="quit_date" column="quit_date"/>-->
+        <result property="quit_date" column="quit_date"/>
         <result property="position" column="position"/>
         <result property="job" column="job"/>
         <result property="salary" column="salary"/>
@@ -273,6 +295,7 @@
         <collection property="evals" column="apply_no = apply_no" ofType="CandidateEval" select="selectEvalList">
             <result property="job_req_no" column="job_req_no" />
             <result property="user_id" column="user_id" />
+            <result property="user_nm" column="user_nm" />
             <result property="sub1_score" column="sub1_score" />
             <result property="sub2_score" column="sub2_score" />
             <result property="sub3_score" column="sub3_score" />

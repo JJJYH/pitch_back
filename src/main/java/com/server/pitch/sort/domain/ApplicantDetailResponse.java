@@ -21,6 +21,7 @@ public class ApplicantDetailResponse {
     private String read_status; //apply 열람여부
     private String status_type; //apply 상태구분
     private String note; //apply 비고
+    private int score; //점수
     private CV cv; //cv 이력서
     private List<CandidateEval> evals; //candidate_eval 채용평가
 }
