@@ -30,7 +30,7 @@ public class ScoreCalculator {
         }
 
         if (filter.getCertificationScore() != 0) {
-            double certificationScore = calculateCertificationScore(applicant.getCv().getCertifications());
+            double certificationScore = calculateCertificationScore(filter.getJob_role(), applicant.getCv().getCertifications());
             totalScore += filter.getCertificationScore() * certificationScore;
         }
 
@@ -61,9 +61,8 @@ public class ScoreCalculator {
                 double experienceYears = calculateYearsBetweenDates(joinDate, quitDate);
                 totalExperienceYears += experienceYears;
             }
-            sortedCareers.sort(Comparator.comparing(Career::getQuit_date).reversed());
         }
-
+        sortedCareers.sort(Comparator.comparing(Career::getQuit_date).reversed());
         int yearsSinceQuit = calculateYearsSinceQuit(sortedCareers.get(0).getQuit_date());
 
         if(yearsSinceQuit >= 5) {
@@ -98,8 +97,9 @@ public class ScoreCalculator {
         return experienceScore;
     }
 
-    private static double calculateCertificationScore(List<Certification> certs) {
+    private static double calculateCertificationScore(String job_role, List<Certification> certs) {
         double certificationScore = 0;
+
 
 
 
@@ -163,6 +163,10 @@ public class ScoreCalculator {
     private static double calculateEducationScore(List<Education> educations) {
         double educationScore = 0;
         List<Education> sortedEducations = new ArrayList<>(educations);
+        sortedEducations.sort(Comparator.comparing(Education::getGraduate_date).reversed());
+
+        String highestEdu = sortedEducations.get(0).getEdu_type();
+
 
         return educationScore;
     }
