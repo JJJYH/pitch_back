@@ -232,7 +232,7 @@ public class CVServiceImpl implements CVService {
         return cv.getCv_no();
     }
 
-    public List<CVFile> convertToCVFiles(MultipartFile[] files, String uploadPath, int cv_no, String user_id) {
+    public List<CVFile> convertToCVFiles(MultipartFile[] files, String uploadPath, int cv_no, String user_id, String endPath) {
 
 
         // UUID 생성 (파일 이름 중복을 방지하기 위함)
@@ -244,6 +244,7 @@ public class CVServiceImpl implements CVService {
                     cvFile.setCv_no(cv_no);
                     cvFile.setUser_id(user_id);
                     cvFile.setFile_size((int) file.getSize());
+                    cvFile.setType(endPath);
 
                     //UUID FileName 저장
                     String originalFilename = file.getOriginalFilename();
@@ -297,7 +298,7 @@ public class CVServiceImpl implements CVService {
                 System.out.println("폴더가 이미 존재합니다.");
             }
 
-            List<CVFile> cvFileList = convertToCVFiles(files, uploadPath,cv_no,user_id);
+            List<CVFile> cvFileList = convertToCVFiles(files, uploadPath,cv_no,user_id, endPath);
 
             log.info("BeforeFiles : " + cvFileList.toString());
             try {

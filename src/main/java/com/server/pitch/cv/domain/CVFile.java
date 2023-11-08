@@ -22,4 +22,5 @@ public class CVFile {
     private int file_size;
     private Date upload_date;
     private String path;
+    private String type;
 }

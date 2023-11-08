@@ -193,12 +193,13 @@
         insert into cv (cv_no, user_id, ps_statement, gender, address,job_posting_no)
         values (#{cv_no},#{user_id},#{ps_statement},#{gender},#{address},#{job_posting_no})
     </insert>
+
     <insert id="insertCVFile">
         <selectKey keyProperty="cv_file_no" order="BEFORE" resultType="int">
             SELECT nextval(cv_file_no_seq)
         </selectKey>
-        insert into cvfile (cv_file_no, cv_no, user_id, file_name, file_type, file_size, upload_date, path)
-        values (#{cv_file_no},#{cv_no},#{user_id},#{file_name},#{file_type},#{file_size},#{upload_date},#{path})
+        insert into cvfile (cv_file_no, cv_no, user_id, file_name, file_type, file_size, upload_date, path,type)
+        values (#{cv_file_no},#{cv_no},#{user_id},#{file_name},#{file_type},#{file_size},#{upload_date},#{path},#{type})
     </insert>
 
     <insert id="insertActivity">
