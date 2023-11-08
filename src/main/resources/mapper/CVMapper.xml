@@ -21,7 +21,6 @@
     <select id="selectCVList" resultMap="cvDataViewResultMap" >
         SELECT cv_no,
                user_id,
-               ps_statement,
                job_posting_no,
                gender,
                address,
@@ -83,7 +82,6 @@
         <id property="cv_no" column="cv_no"/>
         <id property="user_id" column="user_id"/>
         <result property="job_posting_no" column="job_posting_no"/>
-        <result property="ps_statement" column="ps_statement"/>
         <result property="gender" column="gender"/>
         <result property="address" column="address"/>
         <result property="user_nm" column="user_nm"/>
@@ -190,8 +188,8 @@
         <selectKey keyProperty="cv_no" order="BEFORE" resultType="int">
             SELECT nextval(cv_no_seq)
         </selectKey>
-        insert into cv (cv_no, user_id, ps_statement, gender, address,job_posting_no)
-        values (#{cv_no},#{user_id},#{ps_statement},#{gender},#{address},#{job_posting_no})
+        insert into cv (cv_no, user_id,gender, address,job_posting_no)
+        values (#{cv_no},#{user_id},#{gender},#{address},#{job_posting_no})
     </insert>
 
     <insert id="insertCVFile">
@@ -263,7 +261,7 @@
 <!--UPDATE QUERY-->
     <update id="updateCV">
         UPDATE cv
-        SET ps_statement = #{ps_statement}, gender = #{gender}, address = #{address}
+        SET gender = #{gender}, address = #{address}
         WHERE cv_no = #{cv_no} AND user_id = #{user_id}
     </update>
 

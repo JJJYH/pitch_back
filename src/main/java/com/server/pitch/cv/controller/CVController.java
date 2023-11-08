@@ -28,7 +28,7 @@ CVController {
     @Autowired
     public CVService cvService;
     @GetUserAccessToken
-    @PostMapping("/imageUpload")
+    @PostMapping("/image-upload")
     public ResponseEntity<String> handleFileUpload(Users loginUSer,@RequestParam("image") MultipartFile file,@RequestParam("cv_no")int cv_no) {
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("업로드한 파일이 비어 있습니다.");
@@ -149,8 +149,16 @@ CVController {
     }
 
     @GetUserAccessToken
-    @PostMapping("/cvFileUpload")
+    @PostMapping("/cv-file-upload")
     public ResponseEntity<Object> CVFileUpload(Users loginUSer,@RequestParam("cvfile") MultipartFile[] files, @RequestParam("endPath") String endPath,@RequestParam("cv_no")int cv_no) {
         return cvService.crateFile(files,endPath,cv_no, loginUSer.getUser_id());
+    }
+
+    @PostMapping("/send-apply")
+    public ResponseEntity<Object> CVApply(@RequestBody Map<String,Object> requestBody){
+        ObjectMapper mapper = new ObjectMapper();
+        CV cv = mapper.convertValue(requestBody.get("cv"),CV.class);
+        log.info("SEND APPLY DATA IS : " + cv);
+        return ResponseEntity.ok("Send OK");
     }
 }
