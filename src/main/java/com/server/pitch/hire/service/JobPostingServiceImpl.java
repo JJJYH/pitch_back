@@ -1,17 +1,20 @@
 package com.server.pitch.hire.service;
 
+import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
-import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.domain.Liked;
 import com.server.pitch.hire.mapper.JobPostingMapper;
-import com.server.pitch.hire.mapper.JobReqMapper;
 import lombok.AllArgsConstructor;
+import lombok.extern.java.Log;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
+@Log
 public class JobPostingServiceImpl implements JobPostingService{
 
     private JobPostingMapper jobPostingMapper;
@@ -34,12 +37,28 @@ public class JobPostingServiceImpl implements JobPostingService{
 //        return jobPostingMapper.selectJobPostingList();
 //    }
 
+//    @Override
+//    public List<JobPosting> findJobPostingAll(String orderType) {
+//        return jobPostingMapper.selectJobPostingList(orderType);
+//    }
+
     @Override
-    public List<JobPosting> findJobPostingAll(String orderType) {
-        return jobPostingMapper.selectJobPostingList(orderType);
+    public Map<String, Object> findJobPostingAll(FilteringRequest filteringRequest) {
+
+        List<JobPosting> jobPostings = jobPostingMapper.selectJobPostingList(filteringRequest);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("orderType", filteringRequest.getOrderType());
+        result.put("jobType", filteringRequest.getJobType());
+        result.put("jobGroup", filteringRequest.getJobGroup());
+        result.put("location", filteringRequest.getLocation());
+        result.put("postingType", filteringRequest.getPostingType());
+        result.put("search", filteringRequest.getSearch());
+        result.put("jobPostings", jobPostings);
+
+        log.info(result.toString());
+        return result;
     }
-
-
 
     @Override
     public void createLiked(Liked liked) {

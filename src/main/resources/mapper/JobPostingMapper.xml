@@ -72,34 +72,42 @@
 <!--    </select>-->
 
 
-    <select id="selectJobPostingList" resultMap="JobPostingMap">
-        <![CDATA[
-    SELECT jp.*, jr.*, COUNT(l.job_posting_no) as liked_count
-    FROM jobposting jp
-    JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
-    LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no
-    GROUP BY jp.job_posting_no
-    ]]>
+
+    <select id="selectJobPostingList" resultMap="JobPostingMap" parameterType="java.util.LinkedHashMap">
+        SELECT jp.*, jr.*, COUNT(l.job_posting_no) as liked_count
+        FROM jobposting jp
+        JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
+        LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no
+        WHERE 1=1
+        <if test="jobType != 'defaultValue'">
+            AND jr.job_type = #{jobType}
+        </if>
+        <if test="jobGroup != 'defaultValue'">
+            AND jr.job_group = #{jobGroup}
+        </if>
+        <if test="location != 'defaultValue'">
+            AND jr.location = #{location}
+        </if>
+        <if test="postingType != 'defaultValue'">
+            AND jr.posting_type = #{postingType}
+        </if>
+        <if test="search != null">
+            AND (jr.req_title LIKE CONCAT('%', #{search}, '%')
+            OR jr.job_role LIKE CONCAT('%', #{search}, '%'))
+        </if>
+        GROUP BY jp.job_posting_no, jr.job_req_no
         <choose>
             <when test="orderType == 'latest'">
-                <![CDATA[
-            ORDER BY jr.posting_start DESC, jp.job_posting_no DESC
-        ]]>
+                ORDER BY jr.posting_start DESC, jp.job_posting_no DESC
             </when>
             <when test="orderType == 'deadline'">
-                <![CDATA[
-            ORDER BY jr.posting_end ASC, jp.job_posting_no ASC
-        ]]>
+                ORDER BY jr.posting_end ASC, jp.job_posting_no ASC
             </when>
             <when test="orderType == 'mostLiked'">
-                <![CDATA[
-            ORDER BY liked_count DESC, jp.job_posting_no ASC
-        ]]>
+                ORDER BY liked_count DESC, jp.job_posting_no ASC
             </when>
             <otherwise>
-                <![CDATA[
-            ORDER BY jr.posting_start DESC, jp.job_posting_no DESC
-        ]]>
+                ORDER BY jr.posting_start DESC, jp.job_posting_no DESC
             </otherwise>
         </choose>
     </select>
