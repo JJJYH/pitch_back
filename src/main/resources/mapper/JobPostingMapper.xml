@@ -79,26 +79,26 @@
     JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
     LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no
     GROUP BY jp.job_posting_no
-]]>
+    ]]>
         <choose>
             <when test="orderType == 'latest'">
                 <![CDATA[
-            ORDER BY jr.posting_start DESC
+            ORDER BY jr.posting_start DESC, jp.job_posting_no DESC
         ]]>
             </when>
             <when test="orderType == 'deadline'">
                 <![CDATA[
-            ORDER BY jr.posting_end ASC
+            ORDER BY jr.posting_end ASC, jp.job_posting_no ASC
         ]]>
             </when>
             <when test="orderType == 'mostLiked'">
                 <![CDATA[
-            ORDER BY liked_count DESC
+            ORDER BY liked_count DESC, jp.job_posting_no ASC
         ]]>
             </when>
             <otherwise>
                 <![CDATA[
-            ORDER BY jr.posting_start DESC
+            ORDER BY jr.posting_start DESC, jp.job_posting_no DESC
         ]]>
             </otherwise>
         </choose>

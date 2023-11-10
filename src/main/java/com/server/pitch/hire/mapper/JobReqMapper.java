@@ -11,8 +11,8 @@ import java.util.Map;
 
 @Mapper
 public interface JobReqMapper {
-    public List<JobReq> selectJobReqList();
-    public  List<JobReq> selectJobReqStatusList(List<String> selectedStatus);
+    public List<JobReq> selectJobReqList(String user_id);
+    public  List<JobReq> selectJobReqStatusList(List<String> selectedStatus, String user_id);
     public JobReq selectJobReq(int job_req_no);
     public void insertJobReq(JobReq jobReq);
     public void deleteJobReq(int job_req_no);

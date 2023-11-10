@@ -5,6 +5,7 @@ import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.mapper.JobReqMapper;
 import com.server.pitch.users.domain.Users;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,18 +14,19 @@ import java.util.Map;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class JopReqServiceImpl implements JobReqService {
     private JobReqMapper jobReqMapper;
 
 
     @Override
-    public List<JobReq> findAll() {
-        return jobReqMapper.selectJobReqList();
+    public List<JobReq> findAll(String user_id) {
+        return jobReqMapper.selectJobReqList(user_id);
     }
 
     @Override
-    public List<JobReq> findAllByStatus(List<String> selectedStatus) {
-        return jobReqMapper.selectJobReqStatusList(selectedStatus);
+    public List<JobReq> findAllByStatus(List<String> selectedStatus, String user_id) {
+        return jobReqMapper.selectJobReqStatusList(selectedStatus, user_id);
     }
 
     @Override
@@ -55,6 +57,7 @@ public class JopReqServiceImpl implements JobReqService {
 
     @Override
     public List<JobReq> combinedSearchByThings(Map<String, Object> params) {
+        //log.info(jobReqMapper.combinedSearchByThings(params).toString());
         return jobReqMapper.combinedSearchByThings(params);
     }
 
