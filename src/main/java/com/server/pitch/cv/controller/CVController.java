@@ -8,16 +8,24 @@ import com.server.pitch.cv.service.CVService;
 import com.server.pitch.users.domain.Users;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.*;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Slf4j
 @RestController
@@ -92,7 +100,75 @@ CVController {
         cv.setUser_id(loginUSer.getUser_id());
 
 //        log.info(cvService.findAll(Integer.parseInt(request.getParameter("cv_no"))).toString());
+        log.info("FIND ALL CV : "+ cvService.findAll(cv));
         return ResponseEntity.ok(cvService.findAll(cv));
+    }
+
+    private void addFileToZip(ZipOutputStream zipOut, String filename, String content) throws IOException {
+        zipOut.putNextEntry(new ZipEntry(filename));
+        zipOut.write(content.getBytes());
+        zipOut.closeEntry();
+    }
+
+    @GetUserAccessToken
+    @GetMapping("get-files")
+    public ResponseEntity<byte[]> getFile(Users loginUSer,@RequestParam("cv_no")int cv_no){
+
+        List<CVFile> getfiles = cvService.findCVFile(cv_no, loginUSer.getUser_id());
+        log.info("GET FILES : " + getfiles );
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream)) {
+            for (CVFile cvFile : getfiles) {
+                //Resource resource = new ClassPathResource(cvFile.getPath());
+                File file = new File(cvFile.getPath());
+
+                //존재하는 파일인 경우에만 zip 생성
+                if(file.exists()){
+                    InputStream inputStream = Files.newInputStream(file.toPath());
+
+                    // 파일명을 지정하여 ZipEntry 생성
+                    ZipEntry zipEntry = new ZipEntry(cvFile.getFile_name());
+                    zipOutputStream.putNextEntry(zipEntry);
+
+                    // 파일 데이터를 ZipOutputStream에 쓰기
+                    byte[] buffer = new byte[16384];
+                    int len;
+                    while ((len = inputStream.read(buffer)) > 0) {
+                        zipOutputStream.write(buffer, 0, len);
+                    }
+                    zipOutputStream.closeEntry();
+                    inputStream.close();
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        // 압축된 파일 데이터를 byte 배열로 변환하여 클라이언트에게 전송
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "files.zip");
+
+        return new ResponseEntity<>(byteArrayOutputStream.toByteArray(), headers, HttpStatus.OK);
+    }
+
+    @GetUserAccessToken
+    @GetMapping("get-files-infos")
+    public ResponseEntity<Object> getFileInfos(Users loginUSer, @RequestParam("cv_no")int cv_no){
+
+        List<CVFile> getfiles = cvService.findCVFile(cv_no, loginUSer.getUser_id());
+        log.info("GET FILES : " + getfiles );
+
+        getfiles.forEach(
+                file ->{
+                    String name[] = file.getFile_name().split("_");
+                    //Origin Name Setting
+                    file.setFile_name(name[1]);
+                }
+        );
+
+        return ResponseEntity.ok().body(getfiles);
     }
 
     @GetMapping("/find-position")
@@ -110,7 +186,6 @@ CVController {
         cv.setUser_email(loginUSer.getUser_email());
         cv.setUser_phone(loginUSer.getUser_phone());
         cv.setUser_birth(loginUSer.getUser_birth());
-
 
         log.info("Init Profile Setting : "+ cv);
         return ResponseEntity.ok(cv);
@@ -159,6 +234,9 @@ CVController {
         ObjectMapper mapper = new ObjectMapper();
         CV cv = mapper.convertValue(requestBody.get("cv"),CV.class);
         log.info("SEND APPLY DATA IS : " + cv);
+        int apply_no = 0;
+        cvService.createApply(cv, apply_no);
         return ResponseEntity.ok("Send OK");
     }
+
 }

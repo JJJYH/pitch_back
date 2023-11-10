@@ -12,9 +12,12 @@ public interface CVService {
 
     public CV findAll(CV cv);
 
+    public List<CVFile> findCVFile(int cv_no, String user_id);
+
     public int create(CV cv);
 
     public String findPosition(int job_posting_no);
+
     public ResponseEntity<Object> createImageFile(CVFile imgCVFile);
 
     public ResponseEntity<Object> crateFile(MultipartFile[] files, String endPath,int cv_no,String user_id);
@@ -23,6 +26,7 @@ public interface CVService {
 
     public int findCVNO(CV cv);
 
+    public int createApply(CV cv, int apply_no);
 
 
 }

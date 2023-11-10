@@ -1,10 +1,9 @@
 package com.server.pitch.cv.service;
 
-import com.server.pitch.cv.domain.Activity;
-import com.server.pitch.cv.domain.CV;
-import com.server.pitch.cv.domain.CVFile;
+import com.server.pitch.cv.domain.*;
 import com.server.pitch.cv.mapper.CVMapper;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,7 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,6 +30,11 @@ public class CVServiceImpl implements CVService {
     @Override
     public CV findAll(CV cv) {
         return cvMapper.selectCVList(cv);
+    }
+
+    @Override
+    public List<CVFile> findCVFile(int cv_no, String user_id) {
+        return cvMapper.selectCVFile(cv_no, user_id);
     }
 
     @Override
@@ -46,11 +54,189 @@ public class CVServiceImpl implements CVService {
         return cvMapper.selectCVNO(cv);
     }
 
+    /*update 요청 시 기존 DB 데이터와 비교 후, 삭제된 컴포넌트 DELETE MAPPING*/
+//    public void removeCompModify(CV cv){
+//        CV beforeCV = cvMapper.selectCVList(cv);
+//
+//        /**Activity Remove Process*/
+//        List<Activity> beforeActivity = new ArrayList<>();
+//        List<Activity> updateActivity = new ArrayList<>();
+//
+//        beforeActivity = beforeCV.getActivities();
+//        updateActivity = cv.getActivities();
+//
+//        List<Activity> resultActivity = updateActivity;
+//        //기존에 DB에만 있는 데이터만 남기도록 하는 프로세스
+//        beforeActivity
+//                .removeIf(beforeAct -> resultActivity
+//                        .stream()
+//                        .anyMatch(updateAct-> updateAct.getActivity_no() == beforeAct.getActivity_no()));
+//
+//        /**Advantage Remove Process*/
+//        List<Advantage> beforeAdvantage = new ArrayList<>();
+//        List<Advantage> updateAdvantage = new ArrayList<>();
+//        beforeAdvantage = beforeCV.getAdvantages();
+//        updateAdvantage = cv.getAdvantages();
+//
+//        List<Advantage> resultAdvantage = updateAdvantage;
+//
+//        /**Career Remove Process*/
+//        List<Career> beforeCareer = new ArrayList<>();
+//        List<Career> updateCareer = new ArrayList<>();
+//        beforeCareer = beforeCV.getCareers();
+//        updateCareer = cv.getCareers();
+//
+//        List<Career> resultCareer = updateCareer;
+//
+//        /**Certification Remove Process*/
+//        List<Certification> beforeCert = new ArrayList<>();
+//        List<Certification> updateCert = new ArrayList<>();
+//        beforeCert = beforeCV.getCertifications();
+//        updateCert = cv.getCertifications();
+//
+//        List<Certification> resultCert = updateCert;
+//
+//        /**Education Remove Process*/
+//        List<Education> beforeEducation = new ArrayList<>();
+//        List<Education> updateEducation = new ArrayList<>();
+//        beforeEducation = beforeCV.getEducations();
+//        updateEducation = cv.getEducations();
+//
+//        List<Education> resultEducation = updateEducation;
+//
+//        /**Language Remove Process*/
+//        List<Language> beforeLanguage = new ArrayList<>();
+//        List<Language> updateLanguage = new ArrayList<>();
+//        beforeLanguage = beforeCV.getLanguages();
+//        updateLanguage = cv.getLanguages();
+//
+//        List<Language> resultLanguage = updateLanguage;
+//
+//        /**Skill Remove Process*/
+//        List<Skill> beforeSkill = new ArrayList<>();
+//        List<Skill> updateSkill = new ArrayList<>();
+//        beforeSkill = beforeCV.getSkills();
+//        updateSkill = cv.getSkills();
+//
+//        List<Skill> resultSkill = updateSkill;
+//
+//        /**CVFile Remove Process*/
+//        List<CVFile> beforeCVFile = new ArrayList<>();
+//        List<CVFile> updateCVFile = new ArrayList<>();
+//        beforeCVFile = beforeCV.getCvFiles();
+//        updateCVFile = cv.getCvFiles();
+//
+//        List<CVFile> resultCVFile = updateCVFile;
+//
+//
+//
+//
+//    }
+
+    public void removeCompModify(CV cv){
+        CV beforeCV = cvMapper.selectCVList(cv);
+        log.info("BEFORE CV IS : " + beforeCV);
+        log.info("UPDATE CV IS : " + cv);
+        /**Activity Remove Process*/
+
+                removeCompModifyList(beforeCV.getActivities(), cv.getActivities(), Activity::getActivity_no)
+                        .forEach(item -> cvMapper.deleteActivity(item.getActivity_no()));
+
+
+
+        /**Advantage Remove Process*/
+
+                removeCompModifyList(beforeCV.getAdvantages(), cv.getAdvantages(), Advantage::getAdvantage_no)
+                        .forEach(item -> cvMapper.deleteAdvantage(item.getAdvantage_no()));
+
+
+
+        /**Career Remove Process*/
+
+                removeCompModifyList(beforeCV.getCareers(), cv.getCareers(), Career::getCareer_no)
+                        .forEach(item -> cvMapper.deleteCareer(item.getCareer_no()));
+
+
+        /**Certification Remove Process*/
+
+                removeCompModifyList(beforeCV.getCertifications(), cv.getCertifications(), Certification::getCert_no)
+                        .forEach(item -> cvMapper.deleteCertification(item.getCert_no()));
+
+
+
+        /**Education Remove Process*/
+
+                removeCompModifyList(beforeCV.getEducations(), cv.getEducations(), Education::getEdu_no)
+                        .forEach(item -> cvMapper.deleteEducation(item.getEdu_no()));
+
+
+
+        /**Language Remove Process*/
+
+                removeCompModifyList(beforeCV.getLanguages(), cv.getLanguages(), Language::getLanguage_no)
+                        .forEach(item -> cvMapper.deleteLanguage(item.getLanguage_no()));
+
+
+
+        /**Skill Remove Process*/
+
+                removeCompModifyList(beforeCV.getSkills(), cv.getSkills(), Skill::getSkill_no)
+                        .forEach(item -> cvMapper.deleteSkill(item.getSkill_no()));
+
+
+
+        /**CVFile Remove Process*/
+
+                    removeCompModifyList(beforeCV.getCvFiles(), cv.getCvFiles(), CVFile::getCv_file_no)
+                            .forEach(item -> {
+                                removeRealFile(item.getPath());
+                                cvMapper.deleteCVFile(item.getCv_file_no());
+                            });
+    }
+
+    public void removeRealFile(String path){
+        File file = new File(path);
+        if (file.exists()){
+            //파일 삭제
+            log.info("해당 경로의 파일을 삭제합니다 : "+ file.getName());
+            Path filePath = Paths.get(path);
+            try {
+                Files.delete(filePath);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    private <T, ID> List<T> removeCompModifyList(List<T> beforeList, List<T> updateList, Function<T, ID> idExtractor) {
+
+        log.info("UPDATE LIST IS : " + updateList);
+
+        List<T> resultList = new ArrayList<>(updateList != null ? updateList : Collections.emptyList());
+        log.info("RESULT LIST IS : " + resultList);
+
+
+            beforeList
+                    .removeIf(beforeItem ->
+                            resultList
+                                    .stream()
+                                    .anyMatch(updateItem ->
+                                            Objects.equals(idExtractor.apply(updateItem), idExtractor.apply(beforeItem))
+                                    )
+                    );
+            log.info("CALCULATED IS : "+ beforeList);
+        List<T> modifiedList = new ArrayList<>(beforeList);
+
+        return modifiedList;
+    }
+
     @Override
     @Transactional
     public String modify(CV cv) {
+
         //CV update
         cvMapper.updateCV(cv);
+        removeCompModify(cv);
+
         log.info("CV DATA IS UPDATE : " + cv.toString());
         cv.getActivities()
                 .stream()
@@ -104,14 +290,13 @@ public class CVServiceImpl implements CVService {
                     certification.setUser_id(cv.getUser_id());
                     log.info("CV DATA IS UPDATE(certification) : " + certification.toString());
                     cvMapper.updateCertification(certification);
-                    if(certification.getCert_no() ==0){
+                    if(certification.getCert_no() == 0){
                         log.info("기존에 작성된 자격증이 없으므로 post 요청 보냅니다.");
                         cvMapper.insertCertification(certification);
                     }
                 });
 
-        //CVFile insert
-        //cvMapper.insertCVFile();
+
 
         //Education insert
         cv.getEducations()
@@ -120,8 +305,12 @@ public class CVServiceImpl implements CVService {
                 {
                     education.setCv_no(cv.getCv_no());
                     education.setUser_id(cv.getUser_id());
-                    log.info("CV DATA IS UPDATE(education) : " + education.toString());
                     cvMapper.updateEducation(education);
+                    if(education.getEdu_no() ==0) {
+                        log.info("CV DATA IS UPDATE(education) : " + education.toString());
+                        cvMapper.insertEducation(education);
+                    }
+
                 });
 
         //Language insert
@@ -233,8 +422,6 @@ public class CVServiceImpl implements CVService {
     }
 
     public List<CVFile> convertToCVFiles(MultipartFile[] files, String uploadPath, int cv_no, String user_id, String endPath) {
-
-
         // UUID 생성 (파일 이름 중복을 방지하기 위함)
         String uuid = UUID.randomUUID().toString();
 
@@ -297,10 +484,10 @@ public class CVServiceImpl implements CVService {
             } else {
                 System.out.println("폴더가 이미 존재합니다.");
             }
-
             List<CVFile> cvFileList = convertToCVFiles(files, uploadPath,cv_no,user_id, endPath);
 
             log.info("BeforeFiles : " + cvFileList.toString());
+
             try {
                 cvFileList
                         .stream()
@@ -311,13 +498,19 @@ public class CVServiceImpl implements CVService {
             }catch (Exception e){
                 e.printStackTrace();
             }
+
             log.info("AfterFiles : " + cvFileList.toString());
 
             return ResponseEntity.ok("파일이 성공적으로 업로드되었습니다.");
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 업로드 중 오류가 발생했습니다.");
         }
     }
 
-
+    @Override
+    public int createApply(CV cv, int apply_no) {
+           log.info("CREATE APPLY IS : " + cv);
+        return cvMapper.insertApply(cv, apply_no);
+    }
 }
