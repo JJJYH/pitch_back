@@ -68,5 +68,11 @@ public class JobPostingController {
         return jobPostingService.findLikedByUserId(user_id);
     }
 
+    @GetUserAccessToken
+    @GetMapping("/getRecommendList")
+    public List<JobPosting> recommendPostingAll(Users loginUser){
+        String userId = loginUser.getUser_id();
+        return jobPostingService.findRecommendList(userId);
+    }
 
 }

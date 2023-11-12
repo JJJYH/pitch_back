@@ -17,5 +17,6 @@ public interface JobPostingService {
     public void createLiked(Liked liked);
     public void deleteLiked(Liked liked);
     public List<Liked> findLikedByUserId(String user_id);
+    List<JobPosting> findRecommendList(String userId);
 
 }

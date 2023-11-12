@@ -75,4 +75,9 @@ public class JobPostingServiceImpl implements JobPostingService{
         return jobPostingMapper.selectLikedByUserId(user_id);
     }
 
+    @Override
+    public List<JobPosting> findRecommendList(String userId) {
+        return jobPostingMapper.selectRecommendList(userId);
+    }
+
 }

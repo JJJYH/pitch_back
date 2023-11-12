@@ -47,6 +47,12 @@
             <result property="max_num" column="max_num"/>
         </collection>
     </resultMap>
+    
+<!--    <resultMap id="CountApplyMap" type="CountApply">-->
+<!--        <id property="apply_no" column="apply_no"/>-->
+<!--        <result property="user_id" column="user_id"/>-->
+<!--        <result property="job_posting_no" column="job_posting_no"/>-->
+<!--    </resultMap>-->
 
 
     <insert id="insertJobPosting">
@@ -113,6 +119,7 @@
     </select>
 
 
+    <!-- 관심공고 -->
 
     <insert id="insertLiked" parameterType="Liked">
         INSERT INTO liked (job_posting_no, user_id)
@@ -126,6 +133,175 @@
     <select id="selectLikedByUserId" parameterType="string" resultType="Liked">
         SELECT * FROM liked WHERE user_id = #{user_id}
     </select>
+
+
+    <!-- 추천공고 -->
+<!--    <select id="selectRecommendList" resultMap="JobPostingMap">-->
+<!--        SELECT-->
+<!--            jp.*,-->
+<!--            jr.*,-->
+<!--            COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4 as apply_ratio,-->
+<!--            COUNT(l.job_posting_no) * -0.2 as liked_weight,-->
+<!--            IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4) as deadline_weight-->
+<!--        FROM-->
+<!--            jobposting jp-->
+<!--                JOIN-->
+<!--            jobreq jr ON jp.job_req_no = jr.job_req_no-->
+<!--                LEFT JOIN-->
+<!--            apply a ON jp.job_posting_no = a.job_posting_no-->
+<!--                LEFT JOIN-->
+<!--            liked l ON jp.job_posting_no = l.job_posting_no-->
+<!--        WHERE-->
+<!--            1=1-->
+<!--          AND-->
+<!--            jr.posting_end > CURRENT_TIMESTAMP()-->
+<!--        GROUP BY-->
+<!--            jp.job_posting_no, jr.job_req_no-->
+<!--        ORDER BY-->
+<!--            (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4 + COUNT(l.job_posting_no) * -0.2 + IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)) DESC-->
+<!--            LIMIT 6;-->
+<!--    </select>-->
+
+<!--    <select id="selectRecommendList" resultMap="JobPostingMap">-->
+<!--        SELECT-->
+<!--            jp.*,-->
+<!--            jr.*,-->
+<!--            CASE-->
+<!--                WHEN #{userId} IS NOT NULL THEN-->
+<!--                    (-->
+<!--                        (-->
+<!--                                (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +-->
+<!--                                (COUNT(l.job_posting_no) * -0.2) +-->
+<!--                                (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)-->
+<!--                                    ) * 0.3-->
+<!--                                +-->
+<!--                                (-->
+<!--                                        IF(jr.job_group IN (-->
+<!--                                            SELECT job_group FROM liked l-->
+<!--                                                                      JOIN jobposting ON l.job_posting_no = jobposting.job_posting_no-->
+<!--                                            WHERE l.user_id = #{userId}-->
+<!--                                        ), 0.5, 0)-->
+<!--                                        +-->
+<!--                                        IF(jr.job_group IN (-->
+<!--                                            SELECT job_group FROM apply a-->
+<!--                                                                      JOIN jobposting ON a.job_posting_no = jobposting.job_posting_no-->
+<!--                                            WHERE a.user_id = #{userId}-->
+<!--                                        ), 0.5, 0)-->
+<!--                                    ) * 0.7-->
+<!--                            )-->
+<!--                        )-->
+<!--                ELSE-->
+<!--                    (-->
+<!--                        (-->
+<!--                                (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +-->
+<!--                                (COUNT(l.job_posting_no) * -0.2) +-->
+<!--                                (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)-->
+<!--                                    )-->
+<!--                            )-->
+<!--                END AS total_weight-->
+<!--        FROM-->
+<!--            jobposting jp-->
+<!--                JOIN jobreq jr ON jp.job_req_no = jr.job_req_no-->
+<!--                LEFT JOIN apply a ON jp.job_posting_no = a.job_posting_no-->
+<!--                LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no-->
+<!--        WHERE-->
+<!--            1=1 AND jr.posting_end > CURRENT_TIMESTAMP()-->
+<!--        GROUP BY-->
+<!--            jp.job_posting_no, jr.job_req_no-->
+<!--        ORDER BY-->
+<!--            total_weight DESC-->
+<!--            LIMIT 6;-->
+
+<!--    </select>-->
+
+    <select id="selectRecommendList" resultMap="JobPostingMap">
+        SELECT
+            jp.*,
+            jr.*,
+            CASE
+                WHEN #{userId} IS NOT NULL THEN
+                    (
+                        (
+                                (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +
+
+                                (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)
+                                    ) * 0.3
+                                +
+                                (
+                                        IF(jr.job_group IN (
+                                            SELECT job_group FROM liked l
+                                                                      JOIN jobposting ON l.job_posting_no = jobposting.job_posting_no
+                                            WHERE l.user_id = #{userId}
+                                        ), 10, 0)
+                                        +
+                                        IF(jr.job_group IN (
+                                            SELECT job_group FROM apply a
+                                                                      JOIN jobposting ON a.job_posting_no = jobposting.job_posting_no
+                                            WHERE a.user_id = #{userId}
+                                        ), 10, 0)
+                                    ) * 0.7
+                            )
+                        )
+                ELSE
+                    (
+                        (
+                                (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +
+                                (COUNT(l.job_posting_no) * -0.2) +
+                                (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)
+                                    )
+                            )
+                        )
+                END AS total_weight
+        FROM
+            jobposting jp
+                JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
+                LEFT JOIN apply a ON jp.job_posting_no = a.job_posting_no
+                LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no
+        WHERE
+            1=1 AND jr.posting_end > CURRENT_TIMESTAMP()
+        GROUP BY
+            jp.job_posting_no, jr.job_req_no
+        ORDER BY
+            CASE
+                WHEN #{userId} IS NOT NULL THEN
+                    (
+                        (
+                                (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +
+
+                                (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)
+                                    ) * 0.3
+                                +
+                                (
+                                        IF(jr.job_group IN (
+                                            SELECT job_group FROM liked l
+                                                                      JOIN jobposting ON l.job_posting_no = jobposting.job_posting_no
+                                            WHERE l.user_id = #{userId}
+                                        ), 10, 0)
+                                        +
+                                        IF(jr.job_group IN (
+                                            SELECT job_group FROM apply a
+                                                                      JOIN jobposting ON a.job_posting_no = jobposting.job_posting_no
+                                            WHERE a.user_id = #{userId}
+                                        ), 10, 0)
+                                    ) * 0.7
+                            )
+                        )
+                ELSE
+                    (
+                        (
+                                (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +
+                                (COUNT(l.job_posting_no) * -0.2) +
+                                (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4)
+                                    )
+                            )
+                        )
+                END DESC
+            LIMIT 6;
+
+
+    </select>
+
+
 
 
 </mapper>
