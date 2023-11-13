@@ -18,6 +18,7 @@ public interface JobReqMapper {
     public void deleteJobReq(int job_req_no);
     public void deleteJobReqList(List<Integer> jobReqNo);
     public void updateJobReq(JobReq jobReq);
+    public void updateStatusList(JobReq jobReq);
     public List<JobReq> combinedSearchByThings(Map<String, Object> params);
     public List<Users> selectUserWithDept();
     public void insertInterviewer(@Param("job_req_no") int job_req_no, @Param("interviewer_id") String interviewer_id);
