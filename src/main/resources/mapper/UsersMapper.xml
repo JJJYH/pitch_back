@@ -41,7 +41,7 @@
 
     <select id="selectDept" resultType="Department">
         select dept_no, dept_name, max_num from department
-        where dept_nme = #{dept_name}
+        where dept_name = #{dept_name}
     </select>
 
     <select id="selectUser" resultMap="userMap">
@@ -62,9 +62,13 @@
     </insert>
 
     <update id="updateHr">
-        update users set user_nm = #{user_nm},user_email = #{user_email}, user_phone = #{user_phone}, role = #{role} , dept_no = #{dept_no}
+        update users set user_nm = #{user_nm},user_email = #{user_email}, user_phone = #{user_phone}, role = #{role} , dept_no = #{department.dept_no}
                      where user_id = #{user_id}
     </update>
+
+    <delete id="deleteUser">
+        delete from users where user_id = #{user_id}
+    </delete>
 
 
 </mapper>

@@ -297,10 +297,17 @@ public class SecurityServiceImpl implements SecurityService{
 
     @Override
     public Users modifyHrAccount(Users user) {
+        log.info("1"+user.toString());
         if(user.getDepartment().getDept_name()!=null) {
             user.setDepartment(usersMapper.selectDept(user.getDepartment().getDept_name()));
         }
+        log.info("2"+user.toString());
         usersMapper.updateHr(user);
         return user;
+    }
+
+    @Override
+    public void deleteByUserId(String user_id) {
+        usersMapper.deleteUser(user_id);
     }
 }

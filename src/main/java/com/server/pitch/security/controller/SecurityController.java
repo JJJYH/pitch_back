@@ -68,6 +68,7 @@ public class SecurityController {
         log.info("=============등록=============");
         log.info(users.toString());
         users.setUser_pw("1234");
+        log.info(users.toString());
         securityService.createHrAccount(users);
         return ResponseEntity.status(HttpStatus.CREATED).body(users);
     }
@@ -108,5 +109,13 @@ public class SecurityController {
     public ResponseEntity<String> googleLogin(){
        log.info("1. 구글 로그인");
         return ResponseEntity.status(HttpStatus.OK).body("구글 로그인");
+    }
+
+    @PostMapping("/delete-hr-account")
+    public ResponseEntity<String> deleteHrAccount(@RequestParam String user_id){
+        log.info("===================삭제==================");
+        log.info(user_id);
+        securityService.deleteByUserId(user_id);
+        return ResponseEntity.status(HttpStatus.OK).body("delete complete");
     }
 }
