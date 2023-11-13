@@ -42,5 +42,6 @@ public interface SecurityService extends UserDetailsService {
     public boolean cheackUserByGoogleEmail(String email);
 
     public String loginGoogleEmail(String email);
+    public void deleteByUserId(String user_id);
 
 }

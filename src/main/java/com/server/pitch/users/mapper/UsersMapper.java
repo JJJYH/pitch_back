@@ -15,4 +15,5 @@ public interface UsersMapper {
     public List<Department> deptList();
     public Department selectDept(String dept_name);
     public void updateHr(Users users);
+    public void deleteUser(String user_id);
 }
