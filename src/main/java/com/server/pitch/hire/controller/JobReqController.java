@@ -21,16 +21,21 @@ import java.util.Map;
 public class JobReqController {
    private JobReqService jobReqService;
 
+   @GetUserAccessToken
    @GetMapping("/reqlist")
-   public List<JobReq> jobReqAll(){
-       return jobReqService.findAll();
+   public List<JobReq> jobReqAll(Users loginUser){
+       String user_id = loginUser.getUser_id();
+       return jobReqService.findAll(user_id);
    }
 
 
+   @GetUserAccessToken
    @PostMapping("/statuslist")
-   public List<JobReq> jobReqAllByStatus(@RequestBody JobReqList jobReqLists){
+   public List<JobReq> jobReqAllByStatus(@RequestBody JobReqList jobReqList, Users loginUser){
        //log.info(jobReqStatus.toString());
-       return jobReqService.findAllByStatus(jobReqLists.getSelectedStatus());
+       String user_id = loginUser.getUser_id();
+       List<String> selectedStatus = jobReqList.getSelectedStatus();
+       return jobReqService.findAllByStatus(selectedStatus, user_id);
 
    }
 
@@ -59,11 +64,12 @@ public class JobReqController {
 
    @PutMapping("/update/{job_req_no}")
     public void jobReqReplace(@RequestBody JobReq jobReq, @PathVariable int job_req_no){
+       log.info(jobReq.toString());
        jobReq.setJob_req_no(job_req_no);
        jobReqService.modifyJobReq(jobReq);
    }
 
-
+    @GetUserAccessToken
     @PostMapping("/search")
     public List<JobReq> combinedSearch(@RequestBody Map<String, Object> searchParams){
        log.info(searchParams.toString());

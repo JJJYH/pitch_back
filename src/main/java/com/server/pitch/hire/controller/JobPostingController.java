@@ -1,8 +1,8 @@
 package com.server.pitch.hire.controller;
 
 import com.server.pitch.aop.GetUserAccessToken;
+import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
-import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.domain.Liked;
 import com.server.pitch.hire.service.JobPostingService;
 import com.server.pitch.users.domain.Users;
@@ -11,6 +11,7 @@ import lombok.extern.java.Log;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/hire")
@@ -31,10 +32,20 @@ public class JobPostingController {
 //        return jobPostingService.findJobPostingAll();
 //    }
 
-    @GetMapping("/getJobPostingList")
-    public List<JobPosting> jobPostingAll(@RequestParam(name = "orderType", required = false) String orderType){
-        return jobPostingService.findJobPostingAll(orderType);
+//    @GetMapping("/getJobPostingList")
+//    public List<JobPosting> jobPostingAll(@RequestParam(name = "orderType", required = false) String orderType){
+//        return jobPostingService.findJobPostingAll(orderType);
+//    }
+
+    @PostMapping("/getJobPostingList")
+    public Map<String, Object> jobPostingAll(@RequestBody FilteringRequest filteringRequest) {
+        Map<String, Object> result = jobPostingService.findJobPostingAll(filteringRequest);
+        log.info(result.toString());
+
+        return result;
     }
+
+
 
     @GetUserAccessToken
     @PostMapping("/liked")
@@ -57,5 +68,11 @@ public class JobPostingController {
         return jobPostingService.findLikedByUserId(user_id);
     }
 
+    @GetUserAccessToken
+    @GetMapping("/getRecommendList")
+    public List<JobPosting> recommendPostingAll(Users loginUser){
+        String userId = loginUser.getUser_id();
+        return jobPostingService.findRecommendList(userId);
+    }
 
 }

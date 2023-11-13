@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 public interface JobReqService {
-    public List<JobReq> findAll();
-    public List<JobReq> findAllByStatus(List<String> selectedStatus);
+    public List<JobReq> findAll(String user_id);
+    public List<JobReq> findAllByStatus(List<String> selectedStatus, String user_id);
     public JobReq findByNo(int job_req_no);
     public int createJobReq(JobReq jobReq);
     public void deleteJobReq(int job_req_no);
