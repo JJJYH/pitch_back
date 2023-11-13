@@ -6,17 +6,64 @@
 <mapper namespace="com.server.pitch.cv.mapper.CVMapper">
 
 <!--SELECT QUERY-->
-    <select id="selectCVNO" resultType="int">
+    <select id="selectCVNO" resultType="Integer">
         SELECT cv_no FROM cv
         WHERE job_posting_no = #{job_posting_no} AND user_id = #{user_id}
+    </select>
+
+    <select id="selectMainCVNO" resultType="Integer">
+        SELECT cv_no FROM cv
+        WHERE cv_status = #{cv_status} AND user_id = #{user_id}
     </select>
 
     <select id="selectPosition" resultType="String">
         SELECT job_role
         FROM jobposting AS a LEFT JOIN  jobreq AS b
-            ON a.job_req_no = b.job_req_no
+                                        ON a.job_req_no = b.job_req_no
         WHERE job_posting_no = #{job_posting_no}
     </select>
+
+    <select id="selectJobInfo" resultMap="jobInfoResultMap">
+        SELECT jr.job_req_no, user_id, req_title, job_req_date, job_group, job_role, location, hire_num, education, job_type, job_year, posting_type, posting_period, posting_start, posting_end, qualification, preferred, job_duties, req_status, jp.job_posting_no, posting_status
+        FROM jobreq AS jr
+                 LEFT JOIN jobposting AS jp ON jr.job_req_no = jp.job_req_no
+        WHERE job_posting_no = #{job_posting_no}
+    </select>
+
+    <resultMap id="jobInfoResultMap" type="JobReqCV">
+        <id property="job_req_no" column="job_req_no"/>
+        <result property="user_id" column="user_id"/>
+        <result property="req_title" column="req_title"/>
+        <result property="job_req_date" column="job_req_date"/>
+        <result property="job_group" column="job_group"/>
+        <result property="job_role" column="job_role"/>
+        <result property="location" column="location"/>
+        <result property="hire_num" column="hire_num"/>
+        <result property="education" column="education"/>
+        <result property="job_type" column="job_type"/>
+        <result property="job_year" column="job_year"/>
+        <result property="posting_type" column="posting_type"/>
+        <result property="posting_period" column="posting_period"/>
+        <result property="posting_start" column="posting_start"/>
+        <result property="posting_end" column="posting_end"/>
+        <result property="qualification" column="qualification"/>
+        <result property="preferred" column="preferred"/>
+        <result property="job_duties" column="job_duties"/>
+        <result property="req_status" column="req_status"/>
+
+        <!-- Include the JobPosting resultMap -->
+        <association property="job_posting" resultMap="jobPostingResultMap">
+            <id property="job_posting_no" column="job_posting_no"/>
+            <!-- Add other properties specific to JobPosting -->
+        </association>
+    </resultMap>
+
+    <resultMap id="jobPostingResultMap" type="JobPostingCV">
+        <id property="job_posting_no" column="job_posting_no"/>
+        <result property="job_req_no" column="job_req_no"/>
+        <!-- Add other properties specific to JobPosting -->
+    </resultMap>
+
 
     <select id="selectCVFile" resultType="CVFile">
         select cv_file_no, cv_no, user_id, file_name, file_type, file_size, upload_date, path, type
@@ -24,6 +71,11 @@
         where user_id=#{user_id} AND cv_no=#{cv_no}
     </select>
 
+    <select id="selectApplyList" resultType="Apply">
+        select apply_no, cv_no, user_id, job_posting_no, apply_date, applicant_status, note, read_status, status_type
+        from apply
+        where user_id = #{user_id};
+    </select>
     <select id="selectCVList" resultMap="cvDataViewResultMap" >
         SELECT cv_no,
                user_id,
@@ -197,8 +249,8 @@
         <selectKey keyProperty="cv_no" order="BEFORE" resultType="int">
             SELECT nextval(cv_no_seq)
         </selectKey>
-        insert into cv (cv_no, user_id,gender, address,job_posting_no)
-        values (#{cv_no},#{user_id},#{gender},#{address},#{job_posting_no})
+        insert into cv (cv_no, user_id,gender, address,job_posting_no, cv_status)
+        values (#{cv_no},#{user_id},#{gender},#{address},#{job_posting_no},#{cv_status})
     </insert>
 
     <insert id="insertCVFile">
@@ -278,7 +330,7 @@
 <!--UPDATE QUERY-->
     <update id="updateCV">
         UPDATE cv
-        SET gender = #{gender}, address = #{address}
+        SET gender = #{gender}, address = #{address}, cv_status = #{cv_status}
         WHERE cv_no = #{cv_no} AND user_id = #{user_id}
     </update>
 

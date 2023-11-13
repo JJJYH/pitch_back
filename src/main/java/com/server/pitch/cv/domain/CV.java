@@ -17,6 +17,7 @@ public class CV {
     private int cv_no;
     private String user_id;
     private int job_posting_no;
+    private String cv_status;
 
     private String ps_statement;
     private String gender;

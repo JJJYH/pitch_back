@@ -43,6 +43,16 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
+    public List<Apply> findApplyList(String user_id) {
+        return cvMapper.selectApplyList(user_id);
+    }
+
+    @Override
+    public List<JobReq> findJobInfoList(int job_posting_no) {
+        return cvMapper.selectJobInfo(job_posting_no);
+    }
+
+    @Override
     public ResponseEntity<Object> createImageFile(CVFile imgCVFile) {
         log.info("ImgCVFile Is : "+imgCVFile);
         cvMapper.insertCVFile(imgCVFile);
@@ -51,7 +61,30 @@ public class CVServiceImpl implements CVService {
 
     @Override
     public int findCVNO(CV cv) {
-        return cvMapper.selectCVNO(cv);
+        Integer result = cvMapper.selectCVNO(cv);
+
+        if (result != null) {
+            int intValue = result;
+            return intValue;
+        } else {
+            // 결과가 null일 때 처리
+            int intValue = -1;
+            return intValue;
+        }
+    }
+
+    @Override
+    public int findMainCVNO(CV cv) {
+        Integer result = cvMapper.selectMainCVNO(cv);
+
+        if (result != null) {
+            int intValue = result;
+            return intValue;
+        } else {
+            // 결과가 null일 때 처리
+            int intValue = -1;
+            return intValue;
+        }
     }
 
     /*update 요청 시 기존 DB 데이터와 비교 후, 삭제된 컴포넌트 DELETE MAPPING*/
@@ -186,15 +219,22 @@ public class CVServiceImpl implements CVService {
 
 
         /**CVFile Remove Process*/
+                    if(!"MainCV".equals(cv.getCv_status())){
+                        removeCompModifyList(beforeCV.getCvFiles(), cv.getCvFiles(), CVFile::getCv_file_no)
+                                .forEach(item -> {
+                                    removeRealFile(item.getPath());
+                                    cvMapper.deleteCVFile(item.getCv_file_no());
+                                });
+                    }
 
-                    removeCompModifyList(beforeCV.getCvFiles(), cv.getCvFiles(), CVFile::getCv_file_no)
-                            .forEach(item -> {
-                                removeRealFile(item.getPath());
-                                cvMapper.deleteCVFile(item.getCv_file_no());
-                            });
+
     }
 
     public void removeRealFile(String path){
+        if (path == null) {
+            log.warn("파일 경로가 null입니다.");
+            return;
+        }
         File file = new File(path);
         if (file.exists()){
             //파일 삭제

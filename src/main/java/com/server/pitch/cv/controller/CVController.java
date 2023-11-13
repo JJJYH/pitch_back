@@ -109,9 +109,20 @@ CVController {
         zipOut.write(content.getBytes());
         zipOut.closeEntry();
     }
-
     @GetUserAccessToken
-    @GetMapping("get-files")
+    @GetMapping("/apply-list")
+    public ResponseEntity<Object> getApplyList(Users loginUser){
+        Object result = cvService.findApplyList(loginUser.getUser_id());
+        log.info("APPLY LIST IS : "+ result);
+        return ResponseEntity.ok().body(result);
+    }
+
+    @GetMapping("/job-info-list")
+    public ResponseEntity<Object> getJobInfoList(@RequestParam("job_posting_no") int job_posting_no){
+        return ResponseEntity.ok().body(cvService.findJobInfoList(job_posting_no));
+    }
+    @GetUserAccessToken
+    @GetMapping("/get-files")
     public ResponseEntity<byte[]> getFile(Users loginUSer,@RequestParam("cv_no")int cv_no){
 
         List<CVFile> getfiles = cvService.findCVFile(cv_no, loginUSer.getUser_id());
@@ -201,7 +212,18 @@ CVController {
 
         return ResponseEntity.ok(result);
     }
+    @GetUserAccessToken
+    @GetMapping("/get-main-cv-no")
+    public ResponseEntity<Object> getMainCVNO(Users loginUSer){
 
+        CV cv = new CV();
+        cv.setUser_id(loginUSer.getUser_id());
+        cv.setCv_status("MainCV");
+        log.info("GET MAIN CV IS : "+ cv);
+        int result = cvService.findMainCVNO(cv);
+        log.info("GET MAIN CV NO IS : " + result);
+        return ResponseEntity.ok(result);
+    }
 
     @PostMapping
     public ResponseEntity<Integer> CVCrate(@RequestBody Map<String,Object> requestBody){
@@ -210,6 +232,7 @@ CVController {
         CV cv = mapper.convertValue(requestBody.get("cv"),CV.class);
         log.info("CV Data: " + cv);
         int cv_no = cvService.create(cv);
+//        int cv_no = 119;
         return ResponseEntity.status(HttpStatus.OK).body(cv_no);
     }
 

@@ -1,7 +1,9 @@
 package com.server.pitch.cv.service;
 
+import com.server.pitch.cv.domain.Apply;
 import com.server.pitch.cv.domain.CV;
 import com.server.pitch.cv.domain.CVFile;
+import com.server.pitch.cv.domain.JobReq;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,6 +16,9 @@ public interface CVService {
 
     public List<CVFile> findCVFile(int cv_no, String user_id);
 
+    public List<Apply> findApplyList(String user_id);
+
+    public List<JobReq> findJobInfoList(int job_posting_no);
     public int create(CV cv);
 
     public String findPosition(int job_posting_no);
@@ -25,7 +30,7 @@ public interface CVService {
     public String modify(CV cv);
 
     public int findCVNO(CV cv);
-
+    public int findMainCVNO(CV cv);
     public int createApply(CV cv, int apply_no);
 
 

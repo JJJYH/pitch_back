@@ -11,10 +11,12 @@ public interface CVMapper {
 
     // SELECT MAPPER
     public CV selectCVList(CV cv);
-    public int selectCVNO (CV cv);
+    public Integer selectCVNO (CV cv);
+    public Integer selectMainCVNO(CV cv);
     public String selectPosition(int job_posting_no);
     public List<CVFile> selectCVFile(int cv_no, String user_id);
-
+    public List<Apply> selectApplyList(String user_id);
+    public List<JobReq> selectJobInfo(int job_posting_no);
     // INSERT MAPPER
     public int insertCV(CV cv);
     public int insertActivity(Activity activity);
