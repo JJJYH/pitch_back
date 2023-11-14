@@ -226,8 +226,6 @@ public class CVServiceImpl implements CVService {
                                     cvMapper.deleteCVFile(item.getCv_file_no());
                                 });
                     }
-
-
     }
 
     public void removeRealFile(String path){
@@ -275,7 +273,7 @@ public class CVServiceImpl implements CVService {
 
         //CV update
         cvMapper.updateCV(cv);
-        removeCompModify(cv);
+
 
         log.info("CV DATA IS UPDATE : " + cv.toString());
         cv.getActivities()
@@ -336,8 +334,6 @@ public class CVServiceImpl implements CVService {
                     }
                 });
 
-
-
         //Education insert
         cv.getEducations()
                 .stream()
@@ -350,7 +346,6 @@ public class CVServiceImpl implements CVService {
                         log.info("CV DATA IS UPDATE(education) : " + education.toString());
                         cvMapper.insertEducation(education);
                     }
-
                 });
 
         //Language insert
@@ -379,6 +374,8 @@ public class CVServiceImpl implements CVService {
                         cvMapper.insertSkill(skill);
                     }
                 });
+
+        removeCompModify(cv);
         return "";
     }
 

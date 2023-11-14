@@ -97,6 +97,7 @@
                company_name,
                cv_dept_name,
                join_date,
+                quit_date,
                position,
                job,
                salary,
@@ -186,7 +187,7 @@
         <result property="company_name" column="company_name"/>
         <result property="cv_dept_name" column="cv_dept_name"/>
         <result property="join_date" column="join_date"/>
-        <!--        <result property="quit_date" column="quit_date"/>-->
+        <result property="quit_date" column="quit_date"/>
         <result property="position" column="position"/>
         <result property="job" column="job"/>
         <result property="salary" column="salary"/>
@@ -281,8 +282,8 @@
         <selectKey keyProperty="career_no" order="BEFORE" resultType="int">
             SELECT nextval(career_no_seq)
         </selectKey>
-        insert into career (career_no, cv_no, user_id, company_name, cv_dept_name, join_date, position, job, salary, note)
-        values (#{career_no},#{cv_no},#{user_id},#{company_name},#{cv_dept_name},#{join_date},#{position},#{job},#{salary},#{note})
+        insert into career (career_no, cv_no, user_id, company_name, cv_dept_name, join_date, position, job, salary, note,quit_date)
+        values (#{career_no},#{cv_no},#{user_id},#{company_name},#{cv_dept_name},#{join_date},#{position},#{job},#{salary},#{note},#{quit_date})
     </insert>
 
     <insert id="insertCertification">
@@ -353,7 +354,7 @@
 
         UPDATE career
         SET company_name = #{company_name}, cv_dept_name = #{cv_dept_name},
-            join_date = #{join_date}, position = #{position}, job = #{job}, salary = #{salary}, note = #{note}
+            join_date = #{join_date}, position = #{position}, job = #{job}, salary = #{salary}, note = #{note}, quit_date = #{quit_date}
         WHERE career_no = #{career_no} AND cv_no = #{cv_no} AND user_id = #{user_id}
 
     </update>
