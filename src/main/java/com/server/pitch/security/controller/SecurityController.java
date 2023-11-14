@@ -89,6 +89,7 @@ public class SecurityController {
         String accesToken = null;
         String sendAccessToken = securityService.getAccessToken(code);
         JsonNode googleUserInfo = securityService.getUserResource(sendAccessToken);
+        log.info(googleUserInfo.toString());
         //2. 유저정보 검증하기
         String socialEmail = googleUserInfo.get("email").asText();
         log.info(socialEmail);
