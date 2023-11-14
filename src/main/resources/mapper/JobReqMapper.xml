@@ -201,7 +201,7 @@
             </otherwise>
         </choose>
         <if test="searchKeyword != null and searchKeyword != ''">
-            AND (j.req_title LIKE CONCAT('%', #{searchKeyword}, '%')
+            AND (j.job_group LIKE CONCAT('%', #{searchKeyword}, '%')
             OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))
         </if>
         <if test="startDate != null and endDate != null">
