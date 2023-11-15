@@ -1,8 +1,10 @@
 package com.server.pitch.sort.service;
 
+import com.server.pitch.cv.domain.CVFile;
 import com.server.pitch.sort.config.EmailConfig;
 import com.server.pitch.sort.domain.*;
 import com.server.pitch.sort.mapper.SortMapper;
+import com.server.pitch.sort.utils.CVtoExel;
 import com.server.pitch.sort.utils.ScoreCalculator;
 import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
@@ -10,15 +12,23 @@ import kr.co.shineware.nlp.komoran.model.KomoranResult;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Log4j2
@@ -102,14 +112,97 @@ public class SortServiceImpl implements SortService{
 
         return rList;
     }
+
+    @Override
+    public Score selectScore(int job_posting_no, int apply_no) {
+        return mapper.selectScore(job_posting_no, apply_no);
+    }
+
+    @Override
+    public ApplicantAvgResponse selectAvg(int job_posting_no) {
+        return mapper.selectAvg(job_posting_no);
+    }
+
+    @Override
+    public void cvToExcel(List<Integer> list) {
+        for(Integer applyNo : list) {
+            try {
+                ApplicantDetailResponse applicant = mapper.selectApplicant(applyNo);
+                encodePicture(applicant);
+                CVtoExel.copyExcelTemplate(applicant);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public byte[] fileDownload(FileDownloadRequest req) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
+
+            for(Integer applyNo : req.getApplyNo()) {
+                ApplicantDetailResponse applicant = mapper.selectApplicant(applyNo);
+                if(applicant.getCv().getCvFiles().get(0).getFile_name() == null) break;
+                for(CVFile file : applicant.getCv().getCvFiles()) {
+                    for(String type : req.getType()) {
+                        if(file.getType().equals(type)) {
+                            String path = applicant.getCv().getUser_nm() +
+                                    File.separator + type + "(" + applicant.getCv().getUser_nm() + ")." + file.getFile_type();
+                            zipOut.putNextEntry(new ZipEntry(path));
+
+                            File newFile = new File(file.getPath());
+
+                            InputStream inputStream = Files.newInputStream(newFile.toPath());
+                            byte[] buffer = new byte[16384];
+                            int len;
+                            while ((len = inputStream.read(buffer)) > 0) {
+                                zipOut.write(buffer, 0, len);
+                            }
+
+                            zipOut.closeEntry();
+                            inputStream.close();
+                        }
+                    }
+                }
+            }
+            return baos.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public List<ApplicantResponse> findAll(ApplicantRequest req) {
-        return mapper.selectSortList(req);
+        List<ApplicantResponse> res = mapper.selectSortList(req);
+        String path = "C:" +File.separator +  "pitch_resorces" + File.separator +  "images" + File.separator;
+
+        for(ApplicantResponse person : res) {
+            try {
+                String fileName = person.getPicture();
+
+                File file = new File(path + fileName);
+
+                byte[] byteFile = FileCopyUtils.copyToByteArray(file);
+                byte[] base64 =
+                        Base64.getEncoder().encode(byteFile);
+
+                person.setPicture(new String(base64));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return res;
     }
 
     @Override
     public ApplicantDetailResponse findOne(int applyNo) {
-        return mapper.selectApplicant(applyNo);
+        ApplicantDetailResponse person = mapper.selectApplicant(applyNo);
+        FilterRequest filter = new FilterRequest();
+        ScoreCalculator.calculateScore(filter, person);
+        encodePicture(person);
+
+        return person;
     }
 
     @Override
@@ -117,9 +210,9 @@ public class SortServiceImpl implements SortService{
         List<ApplicantDetailResponse> list = mapper.selectFilteredApplicant(postingNo);
 
         for(ApplicantDetailResponse applicant : list) {
-            log.info(applicant);
+
             ScoreCalculator.calculateScore(filter, applicant);
-            log.info(applicant);
+            encodePicture(applicant);
         }
 
         return list;
@@ -283,5 +376,32 @@ public class SortServiceImpl implements SortService{
 
         matcher.appendTail(buffer);
         return buffer.toString();
+    }
+
+    public void encodePicture(ApplicantDetailResponse person) {
+        String path = "C:" +File.separator +  "pitch_resorces" + File.separator +  "images" + File.separator;
+
+        try {
+            List<CVFile> files = person.getCv().getCvFiles();
+            String fileName = "";
+            for(CVFile file : files) {
+                if(file.getType() == null) break;
+                if(file.getType().equals("images")) {
+                    fileName = file.getFile_name();
+                }
+            }
+
+            if (fileName.isEmpty()) {
+                person.setPicture(null);
+            } else {
+                File file = new File(path + fileName);
+                byte[] byteFile = FileCopyUtils.copyToByteArray(file);
+                byte[] base64 = Base64.getEncoder().encode(byteFile);
+                person.setPicture(new String(base64));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

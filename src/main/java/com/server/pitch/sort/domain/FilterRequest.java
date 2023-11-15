@@ -15,6 +15,6 @@ public class FilterRequest {
     private int educationScore; //학력
     private String job_type; //신입 or 경력
     private String job_year; //경력기간
-    private String job_role; //직무
+    private String job_group; //직군
     private String education; //학력구분
 }

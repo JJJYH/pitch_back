@@ -9,7 +9,11 @@ public class PostingInfoResponse {
     private int job_req_no; //jobposting 채용요청번호
     private int job_posting_no; //jobposting 채용공고번호
     private String posting_status; //jobposting 공고상태
+    private String job_year; //jobreq 경력기간
+    private String education; //jobreq 학력구분
     private String req_title; //jobreq 제목
+    private String job_group;  //jobreq 직군
+    private String job_role;  //jobreq 직무
     private int hire_num; //jobreq 채용인원
     private  int hired_num; //apply에서 status_type이 '최종합격'인 사람의 수
     private String job_type; // jobreq 채용형태

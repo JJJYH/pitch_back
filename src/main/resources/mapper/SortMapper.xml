@@ -22,6 +22,93 @@
                  )
     </insert>
 
+    <!-- 지원자 평균 스펙 -->
+    <select id="selectAvg" parameterType="int" resultType="ApplicantAvgResponse">
+        SELECT
+            AVG(avg_activities) AS avgAc,
+            AVG(avg_advantages) AS avgAd,
+            ROUND(AVG(total_career_months)) AS avgExp,
+            AVG(avg_certifications) AS avgCert,
+            ROUND(AVG(avg_educations)) AS avgScore,
+            AVG(avg_languages) AS avgLang,
+            AVG(avg_skills) AS avgSkill
+        FROM (
+                 SELECT
+                     a.user_id,
+                     COUNT(DISTINCT ac.activity_no) / COUNT(DISTINCT a.cv_no) AS avg_activities,
+                     COUNT(DISTINCT ad.advantage_no) / COUNT(DISTINCT a.cv_no) AS avg_advantages,
+                     AVG(DATEDIFF(ca.quit_date, ca.join_date) / 30) as total_career_months,
+                     COUNT(DISTINCT ce.cert_no) / COUNT(DISTINCT a.cv_no) AS avg_certifications,
+                     ROUND(ed_recent.score / ed_recent.total_score * 100) AS avg_educations,
+                     COUNT(DISTINCT la.language_no) / COUNT(DISTINCT a.cv_no) AS avg_languages,
+                     COUNT(DISTINCT sk.skill_no) / COUNT(DISTINCT a.cv_no) AS avg_skills
+                 FROM
+                     apply a
+                         LEFT JOIN
+                     activity ac ON a.cv_no = ac.cv_no AND a.user_id = ac.user_id
+                         LEFT JOIN
+                     advantage ad ON a.cv_no = ad.cv_no AND a.user_id = ad.user_id
+                         LEFT JOIN
+                     career ca ON a.cv_no = ca.cv_no AND a.user_id = ca.user_id
+                         LEFT JOIN
+                     certification ce ON a.cv_no = ce.cv_no AND a.user_id = ce.user_id
+                         LEFT JOIN (
+                         SELECT
+                             score,
+                             total_score,
+                             cv_no,
+                             user_id,
+                             edu_type,
+                             MAX(graduate_date) AS recent_graduate_date
+                         FROM
+                             education
+                         WHERE total_score NOT LIKE 0
+                         GROUP BY
+                             cv_no, user_id, edu_type
+                     ) ed_recent ON a.cv_no = ed_recent.cv_no AND a.user_id = ed_recent.user_id
+                         LEFT JOIN
+                     education ed ON a.cv_no = ed.cv_no AND a.user_id = ed.user_id AND ed.edu_type = ed_recent.edu_type AND ed.graduate_date = ed_recent.recent_graduate_date
+                         LEFT JOIN
+                     language la ON a.cv_no = la.cv_no AND a.user_id = la.user_id
+                         LEFT JOIN
+                     skill sk ON a.cv_no = sk.cv_no AND a.user_id = sk.user_id
+                 WHERE
+                     a.job_posting_no = #{job_posting_no}
+                 GROUP BY
+                     a.user_id
+             ) AS subquery;
+
+    </select>
+
+    <!-- 지원자 상세 점수 -->
+    <select id="selectScore" parameterType="int" resultType="Score">
+        SELECT *
+        FROM (
+                 SELECT
+                     a.apply_no,
+                     a.score,
+                     s.advantage_score,
+                     s.career_score,
+                     s.certification_score,
+                     s.language_score,
+                     s.education_score,
+                     DENSE_RANK() OVER (ORDER BY a.score DESC) AS total_rank,
+                     DENSE_RANK() OVER (ORDER BY s.advantage_score DESC) AS advantage_rank,
+                     DENSE_RANK() OVER (ORDER BY s.career_score DESC) AS career_rank,
+                     DENSE_RANK() OVER (ORDER BY s.certification_score DESC) AS certification_rank,
+                     DENSE_RANK() OVER (ORDER BY s.language_score DESC) AS language_rank,
+                     DENSE_RANK() OVER (ORDER BY s.education_score DESC) AS education_rank,
+                     COUNT(*) OVER () AS applicant_count
+                 FROM
+                     apply a
+                         JOIN
+                     score s ON a.apply_no = s.apply_no
+                 WHERE
+                     a.job_posting_no = #{job_posting_no}
+             ) AS subquery
+        WHERE subquery.apply_no = #{apply_no};
+    </select>
+
     <!--  지원자 목록 조회 메인 쿼리  -->
     <select id="selectSortList"
             parameterType="ApplicantRequest"
@@ -36,18 +123,22 @@
         u.user_birth,
         a.applicant_status,
         a.apply_date,
+        a.score,
         a.read_status,
         a.status_type,
         cv.gender,
-        CASE WHEN c.career_no IS NOT NULL THEN 'y' ELSE 'n' END AS career
+        CASE WHEN c.career_no IS NOT NULL THEN 'y' ELSE 'n' END AS career,
+        cf.file_name AS picture
         FROM apply a
         JOIN cv ON a.cv_no = cv.cv_no
         JOIN users u ON a.user_id = u.user_id
         LEFT JOIN career c ON cv.cv_no = c.cv_no
+        LEFT JOIN cvfile cf ON cv.cv_no = cf.cv_no
         WHERE a.job_posting_no = #{job_posting_no}
-          <include refid="typeFilter"></include>
+        <include refid="typeFilter"></include>
         AND
         <include refid="statusFilter"></include>
+        AND cf.type = 'images'
         GROUP BY a.apply_no
     </select>
 
@@ -91,7 +182,12 @@
             jp.posting_status,
             jr.req_title,
             jr.posting_type,
+            jr.job_group,
+            jr.job_year,
+            jr.education,
+            jr.job_role,
             jr.hire_num,
+            jr.education,
             COUNT(CASE WHEN a.status_type = '최종합격' THEN 1 ELSE NULL END) AS hired_num,
             COUNT(a.job_posting_no) AS total_applicants,
             jr.job_type,
@@ -244,6 +340,7 @@
         <result property="file_name" column="file_name"/>
         <result property="file_type" column="file_type"/>
         <result property="file_size" column="file_size"/>
+        <result property="type" column="type"/>
         <result property="upload_date" column="upload_date"/>
         <result property="path" column="path"/>
     </resultMap>
