@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         config.setAllowedOrigins(Arrays.asList("http://127.0.0.1:3000", "http://localhost:3000"));
                         config.addAllowedMethod("*");
                         config.addAllowedHeader("*");
-                        config.setExposedHeaders(Arrays.asList("accessToken"));
+                        config.setExposedHeaders(Arrays.asList("accessToken", "Content-Disposition"));
                         return config;
                     }).and()
                     .csrf().disable()

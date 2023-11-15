@@ -15,6 +15,7 @@ public class ApplicantResponse {
     private String user_email; //users 이메일
     private String applicant_status; //apply 지원자상태
     private Date apply_date; //apply 지원일
+    private int score; //apply 점수
     private String read_status; //apply 열람여부
     private String status_type; //apply 상태구분
     private String gender; //cv 성별

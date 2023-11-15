@@ -6,8 +6,14 @@ import lombok.extern.log4j.Log4j2;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 
@@ -31,9 +37,10 @@ public class SortController {
      * @return List<ApplicantResponse> 지원자 목록
      */
     @GetMapping("/{job_posting_no}/sort")
-    public List<ApplicantResponse> sortAll(@PathVariable int job_posting_no, @RequestParam String type) {
+    public List<ApplicantResponse> sortAll(@PathVariable int job_posting_no, @RequestParam String type) throws Exception {
         log.info("==================================applicant list controller=====================================");
 
+        log.info(service.findAll(new ApplicantRequest(job_posting_no, "", type)));
         return service.findAll(new ApplicantRequest(job_posting_no, "", type));
     }
 
@@ -98,6 +105,28 @@ public class SortController {
         log.info("==================================applicant evaluate controller=====================================");
 
         service.createEval(eval);
+    }
+
+    /**
+     * 상세 점수 내역 조회하는 api
+     *
+     * @param apply_no,job_posting_no 지원번호, 공고번호
+     * @return Score 점수 객체
+     */
+    @GetMapping("/{job_posting_no}/sort/{apply_no}")
+    public Score scoreOne(@PathVariable int job_posting_no, @PathVariable int apply_no) {
+        return service.selectScore(job_posting_no, apply_no);
+    }
+
+    /**
+     * 지원자 평균 점수 조회하는 api
+     *
+     * @param job_posting_no 공고번호
+     * @return ApplicantAvg
+     */
+    @GetMapping("/{job_posting_no}/average")
+    public ApplicantAvgResponse applicantAvg(@PathVariable int job_posting_no) {
+        return service.selectAvg(job_posting_no);
     }
 
     /**
@@ -215,5 +244,42 @@ public class SortController {
     
         return service.findAllFilteredApplicant(job_posting_no, filter);
     }
+
+    /**
+     * 입사지원서 엑셀로 저장 api
+     * @param list 엑셀로 저장할 지원자들의 지원번호 목록
+     */
+    @PostMapping("/excel")
+    public void cvToExcel(@RequestBody List<Integer> list) {
+        log.info("==================================cv to excel controller=====================================");
+        service.cvToExcel(list);
+    }
+
+    /**
+     * 파일 저장 api
+     * @param req 다운로드할 파일 종류와 지원자들의 지원번호 목록
+     */
+    @PostMapping(value = "/file", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<byte[]> fileDownload(@RequestBody FileDownloadRequest req) throws UnsupportedEncodingException {
+        log.info("==================================file download controller=====================================");
+
+        String fileName = req.getTitle() + ".zip";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition",
+                "attachment; filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString()));
+
+        byte[] fileBytes = service.fileDownload(req);
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentLength(fileBytes.length)
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(fileBytes);
+    }
 }
+
+
+
+
+
 

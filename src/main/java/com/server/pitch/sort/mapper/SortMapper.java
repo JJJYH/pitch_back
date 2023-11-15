@@ -14,5 +14,7 @@ public interface SortMapper {
     public PostingInfoResponse selectPostingInfo(int job_posting_no);
     public int updateStatus(Map<String, Object> data);
     public int insertEval(CandidateEval eval);
+    public Score selectScore(int job_posting_no, int apply_no);
+    public ApplicantAvgResponse selectAvg(int job_posting_no);
     public List<ApplicantDetailResponse> selectFilteredApplicant(int postingNo);
 }
