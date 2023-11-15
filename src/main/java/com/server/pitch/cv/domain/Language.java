@@ -17,6 +17,7 @@ public class Language {
 
     private String exam_type;
     private String language_name;
-    private double language_score;
+    private int language_score;
     private String language_level;
+
 }
