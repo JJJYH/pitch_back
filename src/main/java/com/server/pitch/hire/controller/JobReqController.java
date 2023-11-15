@@ -69,6 +69,11 @@ public class JobReqController {
        jobReqService.modifyJobReq(jobReq);
    }
 
+   @PutMapping("/update/status")
+   public void statusListUpdate(@RequestBody JobReqList jobReqList){
+       jobReqService.modifyStatusList(jobReqList.getJobReqs());
+   }
+
     @GetUserAccessToken
     @PostMapping("/search")
     public List<JobReq> combinedSearch(@RequestBody Map<String, Object> searchParams){

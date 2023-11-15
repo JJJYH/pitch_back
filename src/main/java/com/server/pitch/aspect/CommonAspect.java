@@ -43,18 +43,20 @@ public class CommonAspect {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         String token = request.getHeader("Authorization");
-        log.info(token);
-        token = token.substring(7);
         Object[] getArgs = joinPoint.getArgs();
-
-        Claims claims = Jwts.parser().setSigningKey(accessToken).parseClaimsJws(token).getBody();
-        String user_id = claims.getSubject();
-        Users loginUser = securityService.findById(user_id);
-        loginUser.setUser_pw(null);
-        log.info(loginUser.toString());
-        for(int i=0; i<getArgs.length; i++){
-            if(getArgs[i].getClass().equals(loginUser.getClass())){
-                getArgs[i]=loginUser;
+        if(token !=null) {
+            log.info(token);
+            token = token.substring(7);
+            //Object[] getArgs = joinPoint.getArgs();
+            Claims claims = Jwts.parser().setSigningKey(accessToken).parseClaimsJws(token).getBody();
+            String user_id = claims.getSubject();
+            Users loginUser = securityService.findById(user_id);
+            loginUser.setUser_pw(null);
+            log.info(loginUser.toString());
+            for (int i = 0; i < getArgs.length; i++) {
+                if (getArgs[i].getClass().equals(loginUser.getClass())) {
+                    getArgs[i] = loginUser;
+                }
             }
         }
         return joinPoint.proceed(getArgs);

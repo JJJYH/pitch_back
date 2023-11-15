@@ -16,7 +16,7 @@ import java.util.List;
 public interface JobPostingMapper {
     public void insertJobPosting(JobPosting jobPosting);
     public void updateJobReqStatus(JobReq jobReq);
-//    public List<JobPosting> selectJobPostingList();
+    public List<JobPosting> getAllJobPostingList();
 //    public List<JobPosting> selectJobPostingList(@Param("orderType") String orderType);
     List<JobPosting> selectJobPostingList(FilteringRequest filteringRequest);
     public void insertLiked(Liked liked);

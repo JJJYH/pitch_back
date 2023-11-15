@@ -56,6 +56,13 @@ public class JopReqServiceImpl implements JobReqService {
     }
 
     @Override
+    public void modifyStatusList(List<JobReq> jobReqs) {
+        for (JobReq jobReq : jobReqs) {
+            jobReqMapper.updateStatusList(jobReq);
+        }
+    }
+
+    @Override
     public List<JobReq> combinedSearchByThings(Map<String, Object> params) {
         //log.info(jobReqMapper.combinedSearchByThings(params).toString());
         return jobReqMapper.combinedSearchByThings(params);
