@@ -100,7 +100,7 @@ public class SecurityController {
         }else{
             //4. 검증 실패시 유저정보가 없으면 회원가입으로 유도하기
             message = "Google Email is not registered";
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"" + message + "\"}");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"message\": \"" + message + "\", \"email\": \"" + socialEmail + "\"}");
         }
         message = "Social Login Successful";
         return ResponseEntity.status(HttpStatus.OK).headers(headers).body("{\"message\": \"" + message + "\"}");
