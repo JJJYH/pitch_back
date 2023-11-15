@@ -32,10 +32,10 @@ public class JobPostingServiceImpl implements JobPostingService{
 
     }
 
-//    @Override
-//    public List<JobPosting> findJobPostingAll() {
-//        return jobPostingMapper.selectJobPostingList();
-//    }
+    @Override
+    public List<JobPosting> getAllJobPostingList() {
+        return jobPostingMapper.getAllJobPostingList();
+    }
 
 //    @Override
 //    public List<JobPosting> findJobPostingAll(String orderType) {
@@ -56,7 +56,7 @@ public class JobPostingServiceImpl implements JobPostingService{
         result.put("search", filteringRequest.getSearch());
         result.put("jobPostings", jobPostings);
 
-        log.info(result.toString());
+        //log.info(result.toString());
         return result;
     }
 
@@ -72,6 +72,9 @@ public class JobPostingServiceImpl implements JobPostingService{
 
     @Override
     public List<Liked> findLikedByUserId(String user_id) {
+        if (user_id == null || user_id.isEmpty()) {
+            return null;
+        }
         return jobPostingMapper.selectLikedByUserId(user_id);
     }
 

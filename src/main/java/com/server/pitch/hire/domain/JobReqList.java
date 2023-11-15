@@ -12,4 +12,5 @@ import java.util.List;
 public class JobReqList {
     private List<String> selectedStatus;
     private List<Integer> jobReqNo;
+    private List<JobReq> jobReqs;
 }

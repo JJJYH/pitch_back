@@ -15,6 +15,7 @@ public interface JobReqService {
     public void deleteJobReq(int job_req_no);
     public void deleteJobReqList(List<Integer> jobReqNo);
     public void modifyJobReq(JobReq jobReq);
+    public void modifyStatusList(List<JobReq> jobReqs);
     public List<JobReq> combinedSearchByThings(Map<String, Object> params);
     public List<Users> findUserWithDept();
     public void addInterviewersToJobReq(JobReq jobReq, List<String> interviewer_id);

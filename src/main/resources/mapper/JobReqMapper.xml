@@ -159,6 +159,12 @@
         WHERE job_req_no = #{job_req_no}
     </update>
 
+    <!-- 일괄 승인 일괄 반려 -->
+    <update id="updateStatusList">
+        update jobreq
+        set req_status = #{req_status}
+        where job_req_no = #{job_req_no}
+    </update>
 
     <!--  날짜, 검색, 상태 별 조회 -->
 <!--    <select id="combinedSearchByThings" resultMap="JobReqMap">-->
@@ -195,7 +201,7 @@
             </otherwise>
         </choose>
         <if test="searchKeyword != null and searchKeyword != ''">
-            AND (j.req_title LIKE CONCAT('%', #{searchKeyword}, '%')
+            AND (j.job_group LIKE CONCAT('%', #{searchKeyword}, '%')
             OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))
         </if>
         <if test="startDate != null and endDate != null">

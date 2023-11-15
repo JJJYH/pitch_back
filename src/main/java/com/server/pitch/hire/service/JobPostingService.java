@@ -11,7 +11,7 @@ public interface JobPostingService {
 //    public void createJobPosting(JobPosting jobPosting);
 
     public void createJobPostingAndUpdateJobReqStatus(JobPosting jobPosting);
-//    public List<JobPosting> findJobPostingAll();
+    public List<JobPosting> getAllJobPostingList();
 //    public List<JobPosting> findJobPostingAll(String orderType);
     public Map<String, Object> findJobPostingAll(FilteringRequest filteringRequest);
     public void createLiked(Liked liked);
