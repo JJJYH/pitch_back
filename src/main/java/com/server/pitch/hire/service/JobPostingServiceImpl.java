@@ -53,7 +53,7 @@ public class JobPostingServiceImpl implements JobPostingService{
         result.put("jobGroup", filteringRequest.getJobGroup());
         result.put("location", filteringRequest.getLocation());
         result.put("postingType", filteringRequest.getPostingType());
-        result.put("search", filteringRequest.getSearch());
+        result.put("searchKey", filteringRequest.getSearchKey());
         result.put("jobPostings", jobPostings);
 
         //log.info(result.toString());

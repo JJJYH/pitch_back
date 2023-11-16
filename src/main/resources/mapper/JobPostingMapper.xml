@@ -97,9 +97,9 @@
         <if test="postingType != 'defaultValue'">
             AND jr.posting_type = #{postingType}
         </if>
-        <if test="search != null">
-            AND (jr.job_group LIKE CONCAT('%', #{search}, '%')
-            OR jr.job_role LIKE CONCAT('%', #{search}, '%'))
+        <if test="searchKey != null">
+            AND (jr.job_group LIKE CONCAT('%', #{searchKey}, '%')
+            OR jr.job_role LIKE CONCAT('%', #{searchKey}, '%'))
         </if>
         GROUP BY jp.job_posting_no, jr.job_req_no
         <choose>

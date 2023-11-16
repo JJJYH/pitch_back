@@ -11,7 +11,7 @@ public class FilteringRequest {
     private String jobType;
     private String jobGroup;
     private String location;
-    private String search;
+    private String searchKey;
     private String postingType;
     private String orderType;
 }
