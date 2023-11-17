@@ -343,7 +343,7 @@ public class CVServiceImpl implements CVService {
                     education.setUser_id(cv.getUser_id());
                     cvMapper.updateEducation(education);
                     if(education.getEdu_no() ==0) {
-                        log.info("CV DATA IS UPDATE(education) : " + education.toString());
+                        log.info("기존에 작성된 학력이 없으므로 post 요청 보냅니다.");
                         cvMapper.insertEducation(education);
                     }
                 });
