@@ -242,12 +242,8 @@ public class SortServiceImpl implements SortService{
         if ("pass".equals(type)) {
             switch (statusType) {
                 case "서류전형":
-                    newStatus = "second";
-                    status = "F";
-                    break;
-                case "면접전형":
                     newStatus = "final";
-                    status = "S";
+                    status = "F";
                     break;
                 case "최종합격":
                     newStatus = "final";

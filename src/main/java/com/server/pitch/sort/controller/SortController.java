@@ -103,7 +103,7 @@ public class SortController {
     @PostMapping("/{apply_no}/evaluation")
     public void evaluate(@PathVariable int apply_no, @RequestBody CandidateEval eval) {
         log.info("==================================applicant evaluate controller=====================================");
-
+        log.info(eval);
         service.createEval(eval);
     }
 
