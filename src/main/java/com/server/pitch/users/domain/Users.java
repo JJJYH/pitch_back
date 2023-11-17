@@ -17,5 +17,6 @@ public class Users {
     private String role;
     private String user_phone;
     private String user_birth;
+    private String status;
     private Department department;
 }

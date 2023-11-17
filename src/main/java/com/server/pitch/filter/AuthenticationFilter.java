@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 @Slf4j
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -70,22 +71,23 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request,
                                             HttpServletResponse response,
                                             FilterChain chain,
-                                            Authentication authResult) throws IOException, ServletException {
-        String userEmail = ((User)authResult.getPrincipal()).getUsername();
+                                            Authentication authResult) throws IOException {
+        String userEmail = ((User) authResult.getPrincipal()).getUsername();
         Users user = securityService.findByEmail(userEmail);
         log.info(user.getUser_id());
         log.info(user.getUser_nm());
 
+        if(Objects.equals(user.getStatus(), "app")){
         String accessToken = Jwts.builder()
                 .setSubject(user.getUser_id())
-                .setExpiration(new Date(System.currentTimeMillis()+
+                .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.asecret"))
                 .compact();
 
         String refreshToken = Jwts.builder()
                 .setSubject(accessToken)
-                .setExpiration(new Date(System.currentTimeMillis()+
+                .setExpiration(new Date(System.currentTimeMillis() +
                         Long.parseLong(env.getProperty("token.refreshToken_time"))))
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.rsecret"))
                 .compact();
@@ -98,6 +100,13 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
 
         response.addHeader("accessToken", accessToken);
+    }else{
+            log.info("1");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("This Account is not approved");
+            //response.addHeader("error", "This Account is not approval");
+            //response.sendError(HttpServletResponse.SC_UNAUTHORIZED,"This Account is not approval");
+        }
 
     }
 }

@@ -13,6 +13,7 @@
         <result property="role" column="role"/>
         <result property="user_phone" column="user_phone"/>
         <result property="user_birth" column="user_birth"/>
+        <result property="status" column="status"/>
         <collection property="department" ofType="Department">
             <id property="dept_no" column="dept_no"/>
             <result property="dept_name" column="dept_name"/>
@@ -25,12 +26,12 @@
 <!--    </select>-->
 
     <select id="list" resultMap="userMap">
-        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name from users u
+        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name, status from users u
         left join department d on d.dept_no = u.dept_no
     </select>
 
     <select id="hrList" resultMap="userMap">
-        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name from users u
+        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name, status from users u
         left join department d on d.dept_no = u.dept_no
         where role = 'HR'
     </select>
@@ -45,7 +46,7 @@
     </select>
 
     <select id="selectUser" resultMap="userMap">
-        select user_id, user_email, user_pw, user_nm, role,user_phone,user_birth from users
+        select user_id, user_email, user_pw, user_nm, role,user_phone,user_birth, status from users
         <where>
             <if test="user_id != null">
                 AND user_id = #{user_id}
@@ -57,12 +58,12 @@
     </select>
 
     <insert id="insertUser">
-        insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth, dept_no, role)
-        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role})
+        insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth, dept_no, role, status)
+        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role}, #{status})
     </insert>
 
     <update id="updateHr">
-        update users set user_nm = #{user_nm},user_email = #{user_email}, user_phone = #{user_phone}, role = #{role} , dept_no = #{department.dept_no}
+        update users set user_nm = #{user_nm},user_email = #{user_email}, user_phone = #{user_phone}, role = #{role} , dept_no = #{department.dept_no}, status = #{status}
                      where user_id = #{user_id}
     </update>
 

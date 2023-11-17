@@ -27,6 +27,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -272,27 +273,30 @@ public class SecurityServiceImpl implements SecurityService{
         log.info(user.getUser_id());
         log.info(user.getUser_nm());
 
-        String accessToken = Jwts.builder()
-                .setSubject(user.getUser_id())
-                .setExpiration(new Date(System.currentTimeMillis()+
-                        Long.parseLong(env.getProperty("token.expiration_time"))))
-                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.asecret"))
-                .compact();
+        if(Objects.equals(user.getStatus(), "app")) {
+            String accessToken = Jwts.builder()
+                    .setSubject(user.getUser_id())
+                    .setExpiration(new Date(System.currentTimeMillis() +
+                            Long.parseLong(env.getProperty("token.expiration_time"))))
+                    .signWith(SignatureAlgorithm.HS512, env.getProperty("token.asecret"))
+                    .compact();
 
-        String refreshToken = Jwts.builder()
-                .setSubject(accessToken)
-                .setExpiration(new Date(System.currentTimeMillis()+
-                        Long.parseLong(env.getProperty("token.refreshToken_time"))))
-                .signWith(SignatureAlgorithm.HS512, env.getProperty("token.rsecret"))
-                .compact();
+            String refreshToken = Jwts.builder()
+                    .setSubject(accessToken)
+                    .setExpiration(new Date(System.currentTimeMillis() +
+                            Long.parseLong(env.getProperty("token.refreshToken_time"))))
+                    .signWith(SignatureAlgorithm.HS512, env.getProperty("token.rsecret"))
+                    .compact();
 
-        log.info(accessToken);
-        log.info(refreshToken);
+            log.info(accessToken);
+            log.info(refreshToken);
 
-        saveToken(refreshToken, user.getUser_id(), accessToken);
-        //securityRepository.save(accessToken, refreshToken);
+            saveToken(refreshToken, user.getUser_id(), accessToken);
+            //securityRepository.save(accessToken, refreshToken);
+            return accessToken;
+        }
+        return "error";
 
-        return accessToken;
     }
 
     @Override

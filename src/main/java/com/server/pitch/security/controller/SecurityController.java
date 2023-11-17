@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -96,7 +97,12 @@ public class SecurityController {
         if(securityService.cheackUserByGoogleEmail(socialEmail)){
             //3. 검증 성공시 유저정보로 로그인하기
             accesToken = securityService.loginGoogleEmail(socialEmail);
-            headers.add("accessToken", accesToken);
+            if(Objects.equals(accesToken, "error")){
+                message = "This Account is not approved";
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("{\"message\": \"" + message + "\"}");
+            }else {
+                headers.add("accessToken", accesToken);
+            }
         }else{
             //4. 검증 실패시 유저정보가 없으면 회원가입으로 유도하기
             message = "Google Email is not registered";
