@@ -407,9 +407,6 @@
             <when test="status == 'F'.toString()">
                 a.applicant_status = 'first'
             </when>
-            <when test="status == 'S'.toString()">
-                a.applicant_status = 'second'
-            </when>
             <when test="status == 'FL'.toString()">
                 a.applicant_status = 'final'
             </when>
