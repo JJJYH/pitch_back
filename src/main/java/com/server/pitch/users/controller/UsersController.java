@@ -63,4 +63,10 @@ public class UsersController {
         return ResponseEntity.status(HttpStatus.OK).body(usersService.hrList());
     }
 
+    @GetMapping("/none-app-hr-list")
+    public ResponseEntity<List<Users>> getNoneAppHRList(){
+        log.info("------------------hr list call-------------------");
+        return ResponseEntity.status(HttpStatus.OK).body(usersService.noneAppHrList());
+    }
+
 }

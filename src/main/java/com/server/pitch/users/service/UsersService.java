@@ -8,4 +8,5 @@ public interface UsersService {
     public Users findById(String id);
     public List<Users> list();
     public List<Users> hrList();
+    public List<Users> noneAppHrList();
 }

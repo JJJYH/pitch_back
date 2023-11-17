@@ -26,4 +26,9 @@ public class UsersServiceImpl implements UsersService{
     public List<Users> hrList() {
         return usersMapper.hrList();
     }
+
+    @Override
+    public List<Users> noneAppHrList() {
+        return usersMapper.noneAppHrList();
+    }
 }

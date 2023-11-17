@@ -33,7 +33,13 @@
     <select id="hrList" resultMap="userMap">
         select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name, status from users u
         left join department d on d.dept_no = u.dept_no
-        where role = 'HR'
+        where role = 'HR' AND status = 'app'
+    </select>
+
+    <select id="noneAppHrList" resultMap="userMap">
+        select user_id, user_pw, role, user_phone, user_email, user_birth, user_nm, dept_name, status from users u
+        left join department d on d.dept_no = u.dept_no
+        where role = 'HR' AND status = 'none'
     </select>
 
     <select id="deptList" resultType="Department">
