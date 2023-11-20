@@ -127,6 +127,7 @@
         UPDATE jobreq
         SET
             req_title = #{req_title},
+            job_req_date = #{job_req_date},
             job_group = #{job_group},
             job_role = #{job_role},
             location = #{location},
@@ -202,5 +203,14 @@
         insert into reqfile (reqfile_no, job_req_no, file_name, file_type, file_size, upload_date, path)
         values (#{reqfile_no},#{job_req_no},#{file_name},#{file_type},#{file_size},#{upload_date},#{path})
     </insert>
+
+    <select id="selectReqFiles" resultType="ReqFile">
+        select * from reqfile where job_req_no = #{jobReqNo}
+    </select>
+
+    <select id="selectReqFilesByFileNo" resultType="ReqFile">
+        select * from reqfile where reqfile_no = #{reqfile_no}
+    </select>
+
 
 </mapper>

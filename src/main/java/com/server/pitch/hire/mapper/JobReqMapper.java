@@ -24,5 +24,7 @@ public interface JobReqMapper {
     public List<Users> selectUserWithDept();
     public void insertInterviewer(@Param("job_req_no") int job_req_no, @Param("interviewer_id") String interviewer_id);
     public void insertReqFile(ReqFile reqFile);
+    public List<ReqFile> selectReqFiles(int jobReqNo);
+    public ReqFile selectReqFilesByFileNo(int reqfile_no);
 
 }

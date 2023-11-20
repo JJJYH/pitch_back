@@ -4,12 +4,25 @@ import com.server.pitch.aop.GetUserAccessToken;
 import com.server.pitch.hire.domain.Interviewer;
 import com.server.pitch.hire.domain.JobReq;
 import com.server.pitch.hire.domain.JobReqList;
+import com.server.pitch.hire.domain.ReqFile;
 import com.server.pitch.hire.service.JobReqService;
 import com.server.pitch.users.domain.Users;
 import lombok.AllArgsConstructor;
 import lombok.extern.java.Log;
+import lombok.extern.log4j.Log4j;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +31,7 @@ import java.util.Map;
 @RequestMapping("/admin/hire")
 @AllArgsConstructor
 @Log
+@Log4j
 public class JobReqController {
    private JobReqService jobReqService;
 
@@ -94,5 +108,64 @@ public class JobReqController {
 
     }
 
+
+    @PostMapping("/upload")
+    public void reqFileUpload(@RequestParam("files") List<MultipartFile> files, @RequestParam("jobReqNo") int jobReqNo) {
+        try {
+            jobReqService.createReqFiles(files, jobReqNo);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+    }
+
+    @GetMapping("/{jobReqNo}/files")
+    public List<ReqFile> reqFileByJobReqNo(@PathVariable int jobReqNo){
+        return jobReqService.findReqFiles(jobReqNo);
+    }
+
+//    @GetMapping("/file/{file_name}")
+//    public ResponseEntity<Resource> downLoadFile(@PathVariable String file_name){
+//        try {
+//            String decodedFileName = URLDecoder.decode(file_name, StandardCharsets.UTF_8.toString());
+//            Resource resource = jobReqService.downloadFile(decodedFileName);
+//            return ResponseEntity.ok()
+//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="" + resource.getFilename() + """)
+//                    .body(resource);
+//        } catch (UnsupportedEncodingException e) {
+//            log.error("Error decoding file name: " + e.getMessage(), e);
+//            throw new RuntimeException("Error decoding file name: " + file_name, e);
+//        }
+//    }
+
+//    @GetMapping("/{reqFileNo}/download")
+//    public ResponseEntity<Resource> downloadFile(@PathVariable int reqFileNo) {
+//        return jobReqService.downloadFile(reqFileNo);
+//    }
+
+    @GetMapping("/{reqFileNo}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable int reqFileNo, HttpServletResponse response) {
+        ResponseEntity<Resource> result = jobReqService.downloadFile(reqFileNo);
+
+        if (result.getStatusCode() == HttpStatus.OK) {
+            Resource resource = result.getBody();
+            String fileName = resource.getFilename();
+
+            try {
+                // 한글 파일명이나 특수 문자가 포함된 경우
+                String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString())
+                        .replace("+", "%20");  // 공백 처리
+
+                // Content-Disposition 헤더 설정
+                response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"");
+
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return result;
+    }
 
 }

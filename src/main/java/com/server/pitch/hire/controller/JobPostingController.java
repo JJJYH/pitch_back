@@ -73,7 +73,6 @@ public class JobPostingController {
     @GetMapping("/liked")
     public List<Liked> getLikedByUserId(Users loginUser) {
         String user_id = (loginUser != null) ? loginUser.getUser_id() : null;
-        // user_id가 null이면 빈 리스트 반환
         return (user_id != null) ? jobPostingService.findLikedByUserId(user_id) : Collections.emptyList();
     }
 
