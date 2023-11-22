@@ -266,7 +266,6 @@ public class CVServiceImpl implements CVService {
 
         return modifiedList;
     }
-
     @Override
     @Transactional
     public String modify(CV cv) {
