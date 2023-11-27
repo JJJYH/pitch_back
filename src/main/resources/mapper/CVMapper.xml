@@ -6,6 +6,40 @@
 <mapper namespace="com.server.pitch.cv.mapper.CVMapper">
 
 <!--SELECT QUERY-->
+
+    <select id="selectApplyCheck" resultType="Integer">
+        select cv_no
+        from apply
+        where cv_no=#{cv_no}
+    </select>
+
+    <select id="selectCountReq" resultType="ChartData">
+        SELECT cv_data_view.job_posting_no,
+               COUNT(DISTINCT career_no) / COUNT(DISTINCT apply.cv_no) AS career_count,
+               COUNT(DISTINCT activity_no) / COUNT(DISTINCT apply.cv_no) AS activity_count,
+               COUNT(DISTINCT skill_no) / COUNT(DISTINCT apply.cv_no) AS skill_count,
+               COUNT(DISTINCT advantage_no) / COUNT(DISTINCT apply.cv_no) AS advantage_count,
+               COUNT(DISTINCT cert_no) / COUNT(DISTINCT apply.cv_no) AS cert_count,
+               avg(distinct cv_data_view.score) AS avg_score,
+               count(distinct language_no) /count(distinct apply.cv_no) as lang_count
+        FROM cv_data_view
+                 JOIN apply ON cv_data_view.cv_no = apply.cv_no
+        WHERE edu_type like '%대학교%' and apply.job_posting_no =#{job_posting_no}
+        GROUP BY cv_data_view.job_posting_no
+    </select>
+
+    <select id="selectCountReqUser" resultType="ChartData">
+        select  count(distinct career_no) as career_count,
+                COUNT(DISTINCT activity_no) as activity_count,
+                COUNT(DISTINCT skill_no) as skill_count,
+                COUNT(DISTINCT advantage_no) as advantage_count,
+                COUNT(DISTINCT cert_no) as cert_count,
+                score as avg_score,
+                count(distinct language_no) as lang_count
+        from cv_data_view
+        where cv_no = #{cv_no} and edu_type like '%대학교%'
+    </select>
+
     <select id="selectCVNO" resultType="Integer">
         SELECT cv_no FROM cv
         WHERE job_posting_no = #{job_posting_no} AND user_id = #{user_id}
@@ -22,6 +56,8 @@
                                         ON a.job_req_no = b.job_req_no
         WHERE job_posting_no = #{job_posting_no}
     </select>
+
+
 
     <select id="selectJobInfo" resultMap="jobInfoResultMap">
         SELECT jr.job_req_no, user_id, req_title, job_req_date, job_group, job_role, location, hire_num, education, job_type, job_year, posting_type, posting_period, posting_start, posting_end, qualification, preferred, job_duties, req_status, jp.job_posting_no, posting_status

@@ -33,6 +33,33 @@ public class CVServiceImpl implements CVService {
     }
 
     @Override
+    public List<ChartData> findCountReq(int job_posting_no) {
+        return cvMapper.selectCountReq(job_posting_no);
+    }
+
+    @Override
+    public List<ChartData> findCountReqUser(int cv_no) {
+        return cvMapper.selectCountReqUser(cv_no);
+    }
+
+    @Override
+    public int findApplyCheck(int cv_no) {
+        int result = -1; // 기본값으로 -1을 설정
+
+        try {
+            Integer checkValue = cvMapper.selectApplyCheck(cv_no);
+            if (checkValue != null) {
+                result = checkValue; // null이 아니라면 해당 값으로 설정
+            }
+        } catch (Exception e) {
+            // 예외 처리 로직
+
+        }
+
+        return result;
+    }
+
+    @Override
     public List<CVFile> findCVFile(int cv_no, String user_id) {
         return cvMapper.selectCVFile(cv_no, user_id);
     }
@@ -171,61 +198,41 @@ public class CVServiceImpl implements CVService {
         log.info("BEFORE CV IS : " + beforeCV);
         log.info("UPDATE CV IS : " + cv);
         /**Activity Remove Process*/
-
-                removeCompModifyList(beforeCV.getActivities(), cv.getActivities(), Activity::getActivity_no)
-                        .forEach(item -> cvMapper.deleteActivity(item.getActivity_no()));
-
-
+        removeCompModifyList(beforeCV.getActivities(), cv.getActivities(), Activity::getActivity_no)
+                .forEach(item -> cvMapper.deleteActivity(item.getActivity_no()));
 
         /**Advantage Remove Process*/
-
-                removeCompModifyList(beforeCV.getAdvantages(), cv.getAdvantages(), Advantage::getAdvantage_no)
-                        .forEach(item -> cvMapper.deleteAdvantage(item.getAdvantage_no()));
-
-
+        removeCompModifyList(beforeCV.getAdvantages(), cv.getAdvantages(), Advantage::getAdvantage_no)
+                .forEach(item -> cvMapper.deleteAdvantage(item.getAdvantage_no()));
 
         /**Career Remove Process*/
-
-                removeCompModifyList(beforeCV.getCareers(), cv.getCareers(), Career::getCareer_no)
-                        .forEach(item -> cvMapper.deleteCareer(item.getCareer_no()));
-
+        removeCompModifyList(beforeCV.getCareers(), cv.getCareers(), Career::getCareer_no)
+                .forEach(item -> cvMapper.deleteCareer(item.getCareer_no()));
 
         /**Certification Remove Process*/
-
-                removeCompModifyList(beforeCV.getCertifications(), cv.getCertifications(), Certification::getCert_no)
-                        .forEach(item -> cvMapper.deleteCertification(item.getCert_no()));
-
-
+        removeCompModifyList(beforeCV.getCertifications(), cv.getCertifications(), Certification::getCert_no)
+                .forEach(item -> cvMapper.deleteCertification(item.getCert_no()));
 
         /**Education Remove Process*/
-
-                removeCompModifyList(beforeCV.getEducations(), cv.getEducations(), Education::getEdu_no)
-                        .forEach(item -> cvMapper.deleteEducation(item.getEdu_no()));
-
-
+        removeCompModifyList(beforeCV.getEducations(), cv.getEducations(), Education::getEdu_no)
+                .forEach(item -> cvMapper.deleteEducation(item.getEdu_no()));
 
         /**Language Remove Process*/
-
-                removeCompModifyList(beforeCV.getLanguages(), cv.getLanguages(), Language::getLanguage_no)
-                        .forEach(item -> cvMapper.deleteLanguage(item.getLanguage_no()));
-
-
+        removeCompModifyList(beforeCV.getLanguages(), cv.getLanguages(), Language::getLanguage_no)
+                .forEach(item -> cvMapper.deleteLanguage(item.getLanguage_no()));
 
         /**Skill Remove Process*/
-
-                removeCompModifyList(beforeCV.getSkills(), cv.getSkills(), Skill::getSkill_no)
-                        .forEach(item -> cvMapper.deleteSkill(item.getSkill_no()));
-
-
+        removeCompModifyList(beforeCV.getSkills(), cv.getSkills(), Skill::getSkill_no)
+                .forEach(item -> cvMapper.deleteSkill(item.getSkill_no()));
 
         /**CVFile Remove Process*/
-                    if(!"MainCV".equals(cv.getCv_status())){
-                        removeCompModifyList(beforeCV.getCvFiles(), cv.getCvFiles(), CVFile::getCv_file_no)
-                                .forEach(item -> {
-                                    removeRealFile(item.getPath());
-                                    cvMapper.deleteCVFile(item.getCv_file_no());
-                                });
-                    }
+        if(!"MainCV".equals(cv.getCv_status())){
+            removeCompModifyList(beforeCV.getCvFiles(), cv.getCvFiles(), CVFile::getCv_file_no)
+                    .forEach(item -> {
+                        removeRealFile(item.getPath());
+                        cvMapper.deleteCVFile(item.getCv_file_no());
+                    });
+        }
     }
 
     public void removeRealFile(String path){
@@ -248,10 +255,8 @@ public class CVServiceImpl implements CVService {
     private <T, ID> List<T> removeCompModifyList(List<T> beforeList, List<T> updateList, Function<T, ID> idExtractor) {
 
         log.info("UPDATE LIST IS : " + updateList);
-
         List<T> resultList = new ArrayList<>(updateList != null ? updateList : Collections.emptyList());
         log.info("RESULT LIST IS : " + resultList);
-
 
             beforeList
                     .removeIf(beforeItem ->
@@ -263,9 +268,9 @@ public class CVServiceImpl implements CVService {
                     );
             log.info("CALCULATED IS : "+ beforeList);
         List<T> modifiedList = new ArrayList<>(beforeList);
-
         return modifiedList;
     }
+
     @Override
     @Transactional
     public String modify(CV cv) {

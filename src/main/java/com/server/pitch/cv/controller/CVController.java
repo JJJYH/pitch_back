@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.server.pitch.aop.GetUserAccessToken;
 import com.server.pitch.cv.domain.CV;
 import com.server.pitch.cv.domain.CVFile;
+import com.server.pitch.cv.domain.ChartData;
 import com.server.pitch.cv.service.CVService;
 import com.server.pitch.users.domain.Users;
 import lombok.extern.slf4j.Slf4j;
@@ -188,6 +189,20 @@ CVController {
         return ResponseEntity.ok(position);
     }
 
+    @GetMapping("/apply")
+    public ResponseEntity<Object> applyCheck(@RequestParam("cv_no")int cv_no){
+        int applyChecking = cvService.findApplyCheck(cv_no);
+        return ResponseEntity.ok().body(applyChecking);
+    }
+    @GetMapping("/req-count")
+    public ResponseEntity<Object> reqCount(@RequestParam("job_posting_no")int job_posting_no, @RequestParam("cv_no")int cv_no){
+        log.info("Data : " + job_posting_no + "CV_NO : " +cv_no);
+                List<ChartData> result = cvService.findCountReq(job_posting_no);
+                result.addAll(cvService.findCountReqUser(cv_no));
+        log.info("Result : "+result);
+
+        return ResponseEntity.ok().body(result);
+    }
     @GetUserAccessToken
     @GetMapping("/init-cv")
     public ResponseEntity<Object> InitCV(Users loginUSer){

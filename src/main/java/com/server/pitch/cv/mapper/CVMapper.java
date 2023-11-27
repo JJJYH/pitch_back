@@ -17,6 +17,11 @@ public interface CVMapper {
     public List<CVFile> selectCVFile(int cv_no, String user_id);
     public List<Apply> selectApplyList(String user_id);
     public List<JobReq> selectJobInfo(int job_posting_no);
+    public Integer selectApplyCheck(int cv_no);
+
+    public List<ChartData> selectCountReq(int job_posting_no);
+    public List<ChartData> selectCountReqUser(int cv_no);
+
     // INSERT MAPPER
     public int insertCV(CV cv);
     public int insertActivity(Activity activity);
