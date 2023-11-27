@@ -73,6 +73,11 @@
                      where user_id = #{user_id}
     </update>
 
+    <update id="updateAppHr">
+        update users set status = 'app'
+        where user_id = #{user_id}
+    </update>
+
     <delete id="deleteUser">
         delete from users where user_id = #{user_id}
     </delete>

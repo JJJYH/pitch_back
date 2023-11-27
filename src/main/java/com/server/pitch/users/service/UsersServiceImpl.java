@@ -31,4 +31,18 @@ public class UsersServiceImpl implements UsersService{
     public List<Users> noneAppHrList() {
         return usersMapper.noneAppHrList();
     }
+
+    @Override
+    public void appHr(List<String> selectedUser) {
+        for (String s : selectedUser) {
+            usersMapper.updateAppHr(s);
+        }
+    }
+
+    @Override
+    public void deleteByUserIdList(List<String> selectedUser) {
+        for (String s : selectedUser) {
+            usersMapper.deleteUser(s);
+        }
+    }
 }

@@ -41,9 +41,8 @@ public class UsersController {
 
     @GetUserAccessToken
     @GetMapping("/loginUserTest")
-    public void test2(Users loginUser, @RequestBody Map<String, Object> test){
+    public void test2(Users loginUser){
         log.info("사용자 정보 : "+loginUser.toString());
-        log.info("Request args 정보 : "+test.toString());
     }
 
     @PostMapping("/test")
@@ -67,6 +66,21 @@ public class UsersController {
     public ResponseEntity<List<Users>> getNoneAppHRList(){
         log.info("------------------hr list call-------------------");
         return ResponseEntity.status(HttpStatus.OK).body(usersService.noneAppHrList());
+    }
+
+    @PutMapping("/app-hr")
+    public ResponseEntity<String> appHr(@RequestBody List<String> selectedHR){
+        log.info("------------------------approval HR------------------------");
+        log.info(selectedHR.toString());
+        usersService.appHr(selectedHR);
+        return ResponseEntity.status(HttpStatus.OK).body("update complete");
+    }
+
+    @PostMapping("/rej-hr")
+    public ResponseEntity<String> rejHr(@RequestBody List<String> selectedHR){
+        log.info("------------------------reject HR-----------------------");
+        usersService.deleteByUserIdList(selectedHR);
+        return ResponseEntity.status(HttpStatus.OK).body("reject Complete");
     }
 
 }
