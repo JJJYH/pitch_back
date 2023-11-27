@@ -212,5 +212,12 @@
         select * from reqfile where reqfile_no = #{reqfile_no}
     </select>
 
+    <delete id="deleteReqFiles">
+        delete from reqfile where job_req_no in
+        <foreach collection="jobReqNo" item="jobReqNo" open="(" separator="," close=")">
+            #{jobReqNo}
+        </foreach>
+    </delete>
+
 
 </mapper>

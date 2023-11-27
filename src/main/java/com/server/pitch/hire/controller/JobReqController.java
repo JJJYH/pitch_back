@@ -73,6 +73,7 @@ public class JobReqController {
 
    @DeleteMapping("/delete/checked")
    public void jobReqListDelete(@RequestBody JobReqList jobReqLists){
+       jobReqService.deleteReqFiles(jobReqLists.getJobReqNo());
        jobReqService.deleteJobReqList(jobReqLists.getJobReqNo());
    }
 
@@ -125,24 +126,7 @@ public class JobReqController {
         return jobReqService.findReqFiles(jobReqNo);
     }
 
-//    @GetMapping("/file/{file_name}")
-//    public ResponseEntity<Resource> downLoadFile(@PathVariable String file_name){
-//        try {
-//            String decodedFileName = URLDecoder.decode(file_name, StandardCharsets.UTF_8.toString());
-//            Resource resource = jobReqService.downloadFile(decodedFileName);
-//            return ResponseEntity.ok()
-//                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename="" + resource.getFilename() + """)
-//                    .body(resource);
-//        } catch (UnsupportedEncodingException e) {
-//            log.error("Error decoding file name: " + e.getMessage(), e);
-//            throw new RuntimeException("Error decoding file name: " + file_name, e);
-//        }
-//    }
 
-//    @GetMapping("/{reqFileNo}/download")
-//    public ResponseEntity<Resource> downloadFile(@PathVariable int reqFileNo) {
-//        return jobReqService.downloadFile(reqFileNo);
-//    }
 
     @GetMapping("/{reqFileNo}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable int reqFileNo, HttpServletResponse response) {
@@ -153,11 +137,11 @@ public class JobReqController {
             String fileName = resource.getFilename();
 
             try {
-                // 한글 파일명이나 특수 문자가 포함된 경우
+
                 String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString())
                         .replace("+", "%20");  // 공백 처리
 
-                // Content-Disposition 헤더 설정
+
                 response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + encodedFileName + "\"");
 
             } catch (UnsupportedEncodingException e) {
@@ -167,5 +151,7 @@ public class JobReqController {
 
         return result;
     }
+
+
 
 }

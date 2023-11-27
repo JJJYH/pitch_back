@@ -165,6 +165,8 @@ public class JopReqServiceImpl implements JobReqService {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
     }
 
+
+
     private Resource loadFileAsResource(String filePath) {
         try {
             Path path = Paths.get(filePath);
@@ -180,23 +182,12 @@ public class JopReqServiceImpl implements JobReqService {
     }
 
 
+    @Override
+    public void deleteReqFiles(List<Integer> jobReqNo) {
+        jobReqMapper.deleteReqFiles(jobReqNo);
+    }
 
-//    @Override
-//    public Resource downloadFile(String file_name) {
-//        ReqFile reqFile = jobReqMapper.selectReqFiles(jobReqNo);
-//        try {
-//
-//            Path filePath = Paths.get(uploadPath, attached_name); // 파일이 저장된 실제 경로로 변경
-//            Resource resource = new UrlResource(filePath.toUri());
-//            if (resource.exists()) {
-//                return resource;
-//            } else {
-//                throw new FileNotFoundException("File not found: " + attached_name);
-//            }
-//        } catch (MalformedURLException | FileNotFoundException ex) {
-//            throw new RuntimeException("File not found: " + attached_name, ex);
-//        }
-//    }
+
 
 
 

@@ -1,5 +1,6 @@
 package com.server.pitch.hire.service;
 
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
 import com.server.pitch.hire.domain.Liked;
@@ -18,5 +19,7 @@ public interface JobPostingService {
     public void deleteLiked(Liked liked);
     public List<Liked> findLikedByUserId(String user_id);
     List<JobPosting> findRecommendList(String userId);
+    List<CV> findApplyGender(int jobPostingNo);
+    List<CV> findApplyAge(int jobPostingNo);
 
 }

@@ -28,5 +28,6 @@ public interface JobReqService {
     public List<ReqFile> findReqFiles(int jobReqNo);
     public ReqFile selectReqFilesByFileNo(int reqfile_no);
     ResponseEntity<Resource> downloadFile(int reqFileNo);
+    public void deleteReqFiles(List<Integer> jobReqNo);
 
 }

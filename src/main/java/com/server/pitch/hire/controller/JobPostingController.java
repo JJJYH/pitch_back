@@ -1,6 +1,7 @@
 package com.server.pitch.hire.controller;
 
 import com.server.pitch.aop.GetUserAccessToken;
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
 import com.server.pitch.hire.domain.Liked;
@@ -84,4 +85,13 @@ public class JobPostingController {
         return jobPostingService.findRecommendList(userId);
     }
 
+    @GetMapping("/appliedGender/{jobPostingNo}")
+    public List<CV> getAppliedGender(@PathVariable int jobPostingNo) {
+        return jobPostingService.findApplyGender(jobPostingNo);
+    }
+
+    @GetMapping("/appliedAge/{jobPostingNo}")
+    public List<CV> getAppliedAge(@PathVariable int jobPostingNo){
+        return jobPostingService.findApplyAge(jobPostingNo);
+    }
 }

@@ -3,7 +3,6 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-
 <mapper namespace="com.server.pitch.hire.mapper.JobPostingMapper">
     <!-- JobReq resultMap -->
     <resultMap id="JobPostingMap" type="JobPosting">
@@ -47,12 +46,62 @@
             <result property="max_num" column="max_num"/>
         </collection>
     </resultMap>
-    
-<!--    <resultMap id="CountApplyMap" type="CountApply">-->
-<!--        <id property="apply_no" column="apply_no"/>-->
-<!--        <result property="user_id" column="user_id"/>-->
-<!--        <result property="job_posting_no" column="job_posting_no"/>-->
-<!--    </resultMap>-->
+
+    <resultMap id="cvDataViewResultMap" type="CV">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <result property="job_posting_no" column="job_posting_no"/>
+        <result property="gender" column="gender"/>
+        <result property="address" column="address"/>
+        <result property="user_nm" column="user_nm"/>
+        <result property="user_phone" column="user_phone"/>
+        <result property="user_email" column="user_email"/>
+        <result property="user_birth" column="user_birth"/>
+        <collection property="certifications" resultMap="certificationMap"/>
+        <collection property="educations" resultMap="educationMap"/>
+        <collection property="languages" resultMap="languageMap"/>
+        <collection property="skills" resultMap="skillMap"/>
+    </resultMap>
+
+    <resultMap id="certificationMap" type="Certification">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="cert_no" column="cert_no"/>
+        <result property="cert_name" column="cert_name"/>
+        <result property="publisher" column="publisher"/>
+        <result property="acquisition_date" column="acquisition_date"/>
+    </resultMap>
+
+
+    <resultMap id="educationMap" type="Education">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="edu_no" column="edu_no"/>
+        <result property="edu_type" column="edu_type"/>
+        <result property="enter_date" column="enter_date"/>
+        <result property="graduate_date" column="graduate_date"/>
+        <result property="graduate_type" column="graduate_type"/>
+        <result property="major" column="major"/>
+        <result property="score" column="score"/>
+        <result property="total_score" column="total_score"/>
+    </resultMap>
+
+    <resultMap id="languageMap" type="Language">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="language_no" column="language_no"/>
+        <result property="exam_type" column="exam_type"/>
+        <result property="language_name" column="language_name"/>
+        <result property="language_score" column="language_score"/>
+    </resultMap>
+
+    <resultMap id="skillMap" type="Skill">
+        <id property="cv_no" column="cv_no"/>
+        <id property="user_id" column="user_id"/>
+        <id property="skill_no" column="skill_no"/>
+        <result property="skill_name" column="skill_name"/>
+        <result property="skill_domain" column="skill_domain"/>
+    </resultMap>
 
 
     <insert id="insertJobPosting">
@@ -139,73 +188,153 @@
 
 
     <select id="selectRecommendList" resultMap="JobPostingMap">
+        <![CDATA[
+        WITH RankingCTE AS (
+            SELECT
+                jp.job_posting_no,
+                jr.job_req_no,
+                jr.hire_num,
+                COUNT(DISTINCT a.user_id) / jr.hire_num AS applicant_ratio,
+                PERCENT_RANK() OVER (ORDER BY COUNT(DISTINCT a.user_id) / jr.hire_num) AS rank_applicant_ratio,
+                    CASE WHEN jr.posting_end = '9999-01-01' THEN 20
+                         ELSE DATEDIFF(jr.posting_end, CURRENT_DATE())
+                        END AS days_until_deadline,
+                PERCENT_RANK() OVER (ORDER BY CASE WHEN jr.posting_end = '9999-01-01' THEN 20
+                                   ELSE DATEDIFF(jr.posting_end, CURRENT_DATE())
+                              END) AS rank_days_until_deadline,
+                    COUNT(DISTINCT l.user_id) AS num_of_likes,
+                PERCENT_RANK() OVER (ORDER BY COUNT(DISTINCT l.user_id)) AS rank_num_of_likes
+            FROM jobposting jp
+                     JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
+                     LEFT JOIN apply a ON jp.job_posting_no = a.job_posting_no
+                     LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no
+            WHERE jr.posting_end > CURRENT_DATE()
+            GROUP BY jp.job_posting_no, jr.job_req_no, jr.hire_num, jr.posting_end
+        ), TotalScoreCTE1 AS (
+            SELECT
+                r.*,
+                CASE
+                    WHEN rank_applicant_ratio <= 0.2 THEN 10
+                    WHEN rank_applicant_ratio <= 0.5 THEN 6
+                    ELSE 2
+                    END AS applicant_score,
+                CASE
+                    WHEN rank_days_until_deadline <= 0.2 THEN 10
+                    WHEN rank_days_until_deadline <= 0.5 THEN 6
+                    ELSE 2
+                    END AS deadline_score,
+                CASE
+                    WHEN rank_num_of_likes <= 0.2 THEN 10
+                    WHEN rank_num_of_likes <= 0.5 THEN 6
+                    ELSE 2
+                    END AS likes_score
+            FROM RankingCTE r
+        ), UserAppliedJobs AS (
+            SELECT DISTINCT
+                jr.job_group,
+                jr.job_role,
+                a.job_posting_no
+            FROM
+                apply a
+                    JOIN
+                jobposting jp ON a.job_posting_no = jp.job_posting_no
+                    JOIN
+                jobreq jr ON jp.job_req_no = jr.job_req_no
+            WHERE
+                a.user_id = #{userId}
+        ), UserLikedJobs AS (
+            SELECT DISTINCT
+                jr.job_group,
+                jr.job_role
+            FROM
+                liked l
+                    JOIN
+                jobposting jp ON l.job_posting_no = jp.job_posting_no
+                    JOIN
+                jobreq jr ON jp.job_req_no = jr.job_req_no
+            WHERE
+                l.user_id = #{userId}
+        ), TotalScoreCTE2 AS (
+            SELECT
+                jp.job_posting_no,
+                jr.job_req_no,
+                jr.hire_num,
+                COUNT(DISTINCT a.user_id) / jr.hire_num AS applicant_ratio,
+                CASE
+                    WHEN jr.posting_end = '9999-01-01' THEN 20
+                    ELSE DATEDIFF(jr.posting_end, CURRENT_DATE())
+                    END AS days_until_deadline,
+                COUNT(DISTINCT l.user_id) AS num_of_likes,
+                CASE
+                    WHEN jr.job_group IN (SELECT job_group FROM UserAppliedJobs) THEN 10
+                    ELSE 0
+                    END AS job_group_score_applied,
+                CASE
+                    WHEN jr.job_role IN (SELECT job_role FROM UserAppliedJobs) THEN 20
+                    ELSE 0
+                    END AS job_role_score_applied,
+                CASE
+                    WHEN jr.job_group IN (SELECT job_group FROM UserLikedJobs) THEN 10
+                    ELSE 0
+                    END AS job_group_score_liked,
+                CASE
+                    WHEN jr.job_role IN (SELECT job_role FROM UserLikedJobs) THEN 20
+                    ELSE 0
+                    END AS job_role_score_liked
+            FROM
+                jobposting jp
+                    JOIN
+                jobreq jr ON jp.job_req_no = jr.job_req_no
+                    LEFT JOIN
+                apply a ON jp.job_posting_no = a.job_posting_no
+                    LEFT JOIN
+                liked l ON jp.job_posting_no = l.job_posting_no
+            WHERE
+                jr.posting_end > CURRENT_DATE()
+            GROUP BY
+                jp.job_posting_no, jr.job_req_no, jr.hire_num, jr.posting_end, jr.job_group, jr.job_role
+        )
         SELECT
-        jp.*,
-        jr.*,
-        <include refid="recommendQuery"/>
-        FROM
-        jobposting jp
-        JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
-        LEFT JOIN apply a ON jp.job_posting_no = a.job_posting_no
-        LEFT JOIN liked l ON jp.job_posting_no = l.job_posting_no
-        WHERE
-        1 = 1
-        AND jr.posting_end > CURRENT_TIMESTAMP()
-        GROUP BY
-        jp.job_posting_no, jr.job_req_no
-        ORDER BY
-
-        <include refid="recommendQuery"/>
-
-        LIMIT 6;
+            t1.job_posting_no,
+            t1.job_req_no,
+            t1.hire_num,
+            t1.applicant_ratio,
+            t1.days_until_deadline,
+            t1.num_of_likes,
+            (0.3 * (t1.applicant_score + t1.deadline_score + t1.likes_score)) +
+            (0.7 * (t2.job_group_score_applied + t2.job_role_score_applied + t2.job_group_score_liked + t2.job_role_score_liked)) AS total_score,
+            jr.*
+        FROM TotalScoreCTE1 t1
+                 JOIN TotalScoreCTE2 t2 ON t1.job_posting_no = t2.job_posting_no
+                 JOIN jobreq jr ON t1.job_req_no = jr.job_req_no
+        WHERE t1.job_posting_no NOT IN (SELECT job_posting_no FROM UserAppliedJobs)
+        ORDER BY total_score DESC
+            LIMIT 9;
+        ]]>
     </select>
 
+    <!-- 통계 -->
+    <select id="selectApplyGender" resultMap="cvDataViewResultMap">
+        select
+            cv.cv_no,
+            cv.user_id,
+            cv.gender
+        from
+            cv
+                join apply on apply.cv_no = cv.cv_no
+        where
+            apply.job_posting_no = #{jobPostingNo}
+    </select>
 
-
-
-    <sql id="recommendQuery">
-        CASE
-        WHEN #{userId} IS NOT NULL THEN
-        (
-        (
-        (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +
-        (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4))
-        ) * 0.3
-        +
-        (
-        CASE
-        WHEN jr.job_group IN (
-        SELECT DISTINCT jr.job_group
-        FROM jobreq jr
-        JOIN jobposting jp ON jp.job_req_no = jr.job_req_no
-        JOIN liked l ON jp.job_posting_no = l.job_posting_no
-        WHERE l.user_id = #{userId}
-        ) THEN 10
-        ELSE 0
-        END
-        +
-        CASE
-        WHEN jr.job_group IN (
-        SELECT DISTINCT jr.job_group
-        FROM jobreq jr
-        JOIN jobposting jp ON jp.job_req_no = jr.job_req_no
-        JOIN apply a ON jp.job_posting_no = a.job_posting_no
-        WHERE a.user_id = #{userId}
-        ) THEN 10
-        ELSE 0
-        END
-        ) * 0.7
-        )
-        ELSE
-        (
-        (
-        (COUNT(a.apply_no) / NULLIF(jr.hire_num, 0) * -0.4) +
-        (COUNT(l.job_posting_no) * -0.2) +
-        (IF(jr.posting_end = '9999-01-01', -10, TIMESTAMPDIFF(SECOND, CURRENT_TIMESTAMP(), jr.posting_end) / (60 * 60 * 24) * -0.4))
-        )
-        )
-        END
-    </sql>
-
+    <select id="selectApplyAge" resultMap="cvDataViewResultMap">
+        select
+            cv.cv_no,
+            cv.user_id,
+            u.user_birth
+        from cv
+        join apply a on a.cv_no = cv.cv_no
+        join users u on u.user_id = cv.user_id
+        where a.job_posting_no = #{jobPostingNo}
+    </select>
 
 </mapper>

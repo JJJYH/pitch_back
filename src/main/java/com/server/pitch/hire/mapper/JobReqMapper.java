@@ -26,5 +26,6 @@ public interface JobReqMapper {
     public void insertReqFile(ReqFile reqFile);
     public List<ReqFile> selectReqFiles(int jobReqNo);
     public ReqFile selectReqFilesByFileNo(int reqfile_no);
+    public void deleteReqFiles(List<Integer> jobReqNo);
 
 }

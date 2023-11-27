@@ -1,5 +1,6 @@
 package com.server.pitch.hire.service;
 
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
 import com.server.pitch.hire.domain.Liked;
@@ -81,6 +82,16 @@ public class JobPostingServiceImpl implements JobPostingService{
     @Override
     public List<JobPosting> findRecommendList(String userId) {
         return jobPostingMapper.selectRecommendList(userId);
+    }
+
+    @Override
+    public List<CV> findApplyGender(int jobPostingNo) {
+        return jobPostingMapper.selectApplyGender(jobPostingNo);
+    }
+
+    @Override
+    public List<CV> findApplyAge(int jobPostingNo) {
+        return jobPostingMapper.selectApplyAge(jobPostingNo);
     }
 
 }
