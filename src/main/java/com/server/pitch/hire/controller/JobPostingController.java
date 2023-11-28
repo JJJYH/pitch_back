@@ -34,6 +34,13 @@ public class JobPostingController {
         return jobPostingService.getAllJobPostingList();
     }
 
+    @GetUserAccessToken
+    @GetMapping("/getAllJobPostingListById")
+    public List<JobPosting> jobPostingAllById(Users loginUser){
+        log.info("========getByID===========");
+        return jobPostingService.getAllJobPostingListById(loginUser.getUser_id());
+    }
+
 //    @GetMapping("/getJobPostingList")
 //    public List<JobPosting> jobPostingAll(@RequestParam(name = "orderType", required = false) String orderType){
 //        return jobPostingService.findJobPostingAll(orderType);
@@ -93,5 +100,10 @@ public class JobPostingController {
     @GetMapping("/appliedAge/{jobPostingNo}")
     public List<CV> getAppliedAge(@PathVariable int jobPostingNo){
         return jobPostingService.findApplyAge(jobPostingNo);
+    }
+
+    @GetMapping("/appliedCert/{jobPostingNo}")
+    public List<CV> getAppliedCert(@PathVariable int jobPostingNo){
+        return jobPostingService.findApplyCert(jobPostingNo);
     }
 }

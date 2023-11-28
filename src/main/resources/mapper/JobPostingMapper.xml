@@ -127,6 +127,18 @@
     </select>
 
 
+    <select id="getAllJobPostingListById" resultMap="JobPostingMap">
+        SELECT jp.*, jr.*
+        FROM jobposting jp
+                 JOIN jobreq jr ON jp.job_req_no = jr.job_req_no
+        <where>
+            <if test="user_id != 'admin'">
+                AND jr.user_id = #{user_id}
+            </if>
+        </where>
+    </select>
+
+
 
     <select id="selectJobPostingList" resultMap="JobPostingMap" parameterType="java.util.LinkedHashMap">
         SELECT jp.*, jr.*, COUNT(l.job_posting_no) as liked_count
@@ -335,6 +347,17 @@
         join apply a on a.cv_no = cv.cv_no
         join users u on u.user_id = cv.user_id
         where a.job_posting_no = #{jobPostingNo}
+    </select>
+
+    <select id="selectApplyCert" resultMap="cvDataViewResultMap">
+        select
+            c.cert_no,
+            cv.cv_no,
+            cv.user_id,
+            c.cert_name
+        from cv
+                 join certification c on c.cv_no = cv.cv_no
+        where cv.job_posting_no = #{jobPostingNo} and cv.user_id = c.user_id
     </select>
 
 </mapper>

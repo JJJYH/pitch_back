@@ -13,6 +13,7 @@ public interface JobPostingService {
 
     public void createJobPostingAndUpdateJobReqStatus(JobPosting jobPosting);
     public List<JobPosting> getAllJobPostingList();
+    public List<JobPosting> getAllJobPostingListById(String userId);
 //    public List<JobPosting> findJobPostingAll(String orderType);
     public Map<String, Object> findJobPostingAll(FilteringRequest filteringRequest);
     public void createLiked(Liked liked);
@@ -21,5 +22,6 @@ public interface JobPostingService {
     List<JobPosting> findRecommendList(String userId);
     List<CV> findApplyGender(int jobPostingNo);
     List<CV> findApplyAge(int jobPostingNo);
+    List<CV> findApplyCert(int jobPostingNo);
 
 }

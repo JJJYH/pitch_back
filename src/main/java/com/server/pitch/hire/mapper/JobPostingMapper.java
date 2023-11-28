@@ -18,6 +18,7 @@ public interface JobPostingMapper {
     public void insertJobPosting(JobPosting jobPosting);
     public void updateJobReqStatus(JobReq jobReq);
     public List<JobPosting> getAllJobPostingList();
+    public List<JobPosting> getAllJobPostingListById(String userId);
 //    public List<JobPosting> selectJobPostingList(@Param("orderType") String orderType);
     List<JobPosting> selectJobPostingList(FilteringRequest filteringRequest);
     public void insertLiked(Liked liked);
@@ -26,4 +27,5 @@ public interface JobPostingMapper {
     List<JobPosting> selectRecommendList(@Param("userId") String userId);
     List<CV> selectApplyGender(int jobPostingNo);
     List<CV> selectApplyAge(int jobPostingNo);
+    List<CV> selectApplyCert(int jobPostingNo);
 }

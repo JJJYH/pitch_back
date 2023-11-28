@@ -38,6 +38,11 @@ public class JobPostingServiceImpl implements JobPostingService{
         return jobPostingMapper.getAllJobPostingList();
     }
 
+    @Override
+    public List<JobPosting> getAllJobPostingListById(String userId) {
+        return jobPostingMapper.getAllJobPostingListById(userId);
+    }
+
 //    @Override
 //    public List<JobPosting> findJobPostingAll(String orderType) {
 //        return jobPostingMapper.selectJobPostingList(orderType);
@@ -92,6 +97,11 @@ public class JobPostingServiceImpl implements JobPostingService{
     @Override
     public List<CV> findApplyAge(int jobPostingNo) {
         return jobPostingMapper.selectApplyAge(jobPostingNo);
+    }
+
+    @Override
+    public List<CV> findApplyCert(int jobPostingNo) {
+        return jobPostingMapper.selectApplyCert(jobPostingNo);
     }
 
 }
