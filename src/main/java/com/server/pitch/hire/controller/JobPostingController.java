@@ -1,6 +1,7 @@
 package com.server.pitch.hire.controller;
 
 import com.server.pitch.aop.GetUserAccessToken;
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
 import com.server.pitch.hire.domain.Liked;
@@ -31,6 +32,13 @@ public class JobPostingController {
     @GetMapping("/getAllJobPostingList")
     public List<JobPosting> jobPostingAll(){
         return jobPostingService.getAllJobPostingList();
+    }
+
+    @GetUserAccessToken
+    @GetMapping("/getAllJobPostingListById")
+    public List<JobPosting> jobPostingAllById(Users loginUser){
+        log.info("========getByID===========");
+        return jobPostingService.getAllJobPostingListById(loginUser.getUser_id());
     }
 
 //    @GetMapping("/getJobPostingList")
@@ -73,7 +81,6 @@ public class JobPostingController {
     @GetMapping("/liked")
     public List<Liked> getLikedByUserId(Users loginUser) {
         String user_id = (loginUser != null) ? loginUser.getUser_id() : null;
-        // user_id가 null이면 빈 리스트 반환
         return (user_id != null) ? jobPostingService.findLikedByUserId(user_id) : Collections.emptyList();
     }
 
@@ -85,4 +92,18 @@ public class JobPostingController {
         return jobPostingService.findRecommendList(userId);
     }
 
+    @GetMapping("/appliedGender/{jobPostingNo}")
+    public List<CV> getAppliedGender(@PathVariable int jobPostingNo) {
+        return jobPostingService.findApplyGender(jobPostingNo);
+    }
+
+    @GetMapping("/appliedAge/{jobPostingNo}")
+    public List<CV> getAppliedAge(@PathVariable int jobPostingNo){
+        return jobPostingService.findApplyAge(jobPostingNo);
+    }
+
+    @GetMapping("/appliedCert/{jobPostingNo}")
+    public List<CV> getAppliedCert(@PathVariable int jobPostingNo){
+        return jobPostingService.findApplyCert(jobPostingNo);
+    }
 }

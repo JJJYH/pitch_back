@@ -68,20 +68,6 @@
     </select>
 
 
-<!--    <select id="selectJobReqStatusList" resultMap="JobReqMap">-->
-<!--        SELECT j.*, u.*-->
-<!--        FROM jobreq j-->
-<!--        JOIN users u ON j.user_id = u.user_id-->
-<!--        WHERE u.role='hr'-->
-<!--        <if test="selectedStatus != null and selectedStatus.size() > 0">-->
-<!--            AND j.req_status IN-->
-<!--            <foreach collection="selectedStatus" item="status" open="(" separator="," close=")">-->
-<!--                #{status}-->
-<!--            </foreach>-->
-<!--        </if>-->
-<!--        order by j.job_req_date desc, j.job_req_no desc;-->
-<!--    </select>-->
-
     <select id="selectJobReqStatusList" resultMap="JobReqMap">
         SELECT j.*, u.*
         FROM jobreq j
@@ -141,6 +127,7 @@
         UPDATE jobreq
         SET
             req_title = #{req_title},
+            job_req_date = #{job_req_date},
             job_group = #{job_group},
             job_role = #{job_role},
             location = #{location},
@@ -167,26 +154,6 @@
     </update>
 
     <!--  날짜, 검색, 상태 별 조회 -->
-<!--    <select id="combinedSearchByThings" resultMap="JobReqMap">-->
-<!--        SELECT j.*, u.*-->
-<!--        FROM jobreq j-->
-<!--        JOIN users u ON j.user_id = u.user_id-->
-<!--        WHERE u.role = 'hr'-->
-<!--        <if test="searchKeyword != null and searchKeyword != ''">-->
-<!--            AND (j.req_title LIKE CONCAT('%', #{searchKeyword}, '%')-->
-<!--                 OR j.job_role LIKE CONCAT('%', #{searchKeyword}, '%'))-->
-<!--        </if>-->
-<!--        <if test="startDate != null and endDate != null">-->
-<!--            AND j.job_req_date BETWEEN #{startDate} AND date_add(#{endDate}, Interval 1 day)-->
-<!--        </if>-->
-<!--        <if test="selectedStatus != null and selectedStatus.size() > 0">-->
-<!--            AND j.req_status IN-->
-<!--            <foreach collection="selectedStatus" item="status" open="(" separator="," close=")">-->
-<!--                #{status}-->
-<!--            </foreach>-->
-<!--        </if>-->
-<!--        ORDER BY j.job_req_date DESC, j.job_req_no DESC;-->
-<!--    </select>-->
 
     <select id="combinedSearchByThings" resultMap="JobReqMap">
         SELECT j.*, u.*
@@ -229,6 +196,28 @@
         VALUES (#{job_req_no}, #{interviewer_id})
     </insert>
 
+    <insert id="insertReqFile">
+        <selectKey keyProperty="reqfile_no" order="BEFORE" resultType="int">
+            SELECT nextval(reqfile_no_seq)
+        </selectKey>
+        insert into reqfile (reqfile_no, job_req_no, file_name, file_type, file_size, upload_date, path)
+        values (#{reqfile_no},#{job_req_no},#{file_name},#{file_type},#{file_size},#{upload_date},#{path})
+    </insert>
+
+    <select id="selectReqFiles" resultType="ReqFile">
+        select * from reqfile where job_req_no = #{jobReqNo}
+    </select>
+
+    <select id="selectReqFilesByFileNo" resultType="ReqFile">
+        select * from reqfile where reqfile_no = #{reqfile_no}
+    </select>
+
+    <delete id="deleteReqFiles">
+        delete from reqfile where job_req_no in
+        <foreach collection="jobReqNo" item="jobReqNo" open="(" separator="," close=")">
+            #{jobReqNo}
+        </foreach>
+    </delete>
 
 
 </mapper>

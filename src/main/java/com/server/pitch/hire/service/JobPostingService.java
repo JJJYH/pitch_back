@@ -1,5 +1,6 @@
 package com.server.pitch.hire.service;
 
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.hire.domain.FilteringRequest;
 import com.server.pitch.hire.domain.JobPosting;
 import com.server.pitch.hire.domain.Liked;
@@ -12,11 +13,15 @@ public interface JobPostingService {
 
     public void createJobPostingAndUpdateJobReqStatus(JobPosting jobPosting);
     public List<JobPosting> getAllJobPostingList();
+    public List<JobPosting> getAllJobPostingListById(String userId);
 //    public List<JobPosting> findJobPostingAll(String orderType);
     public Map<String, Object> findJobPostingAll(FilteringRequest filteringRequest);
     public void createLiked(Liked liked);
     public void deleteLiked(Liked liked);
     public List<Liked> findLikedByUserId(String user_id);
     List<JobPosting> findRecommendList(String userId);
+    List<CV> findApplyGender(int jobPostingNo);
+    List<CV> findApplyAge(int jobPostingNo);
+    List<CV> findApplyCert(int jobPostingNo);
 
 }
