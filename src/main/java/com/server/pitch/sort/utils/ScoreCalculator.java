@@ -3,6 +3,7 @@ package com.server.pitch.sort.utils;
 import com.server.pitch.cv.domain.*;
 import com.server.pitch.sort.domain.ApplicantDetailResponse;
 import com.server.pitch.sort.domain.FilterRequest;
+import com.server.pitch.sort.domain.Score;
 import lombok.extern.log4j.Log4j2;
 
 import java.time.LocalDate;
@@ -18,36 +19,83 @@ import java.util.regex.Pattern;
 @Log4j2
 public class ScoreCalculator {
     public static void calculateScore(FilterRequest filter, ApplicantDetailResponse applicant) {
-
         double totalScore = 0;
 
         if (filter.getAdvantageScore() != 0) {
             double advantageScore = calculateAdvantageScore(applicant.getCv().getAdvantages());
-            totalScore += filter.getAdvantageScore() * advantageScore;
+            double aScore = filter.getAdvantageScore() * advantageScore;
+            totalScore += aScore;
         }
 
         if (filter.getCareerScore() != 0) {
             double experienceScore = calculateCareerScore(filter.getJob_type(), filter.getJob_year(), applicant.getCv().getCareers());
-            totalScore += filter.getCareerScore() * experienceScore;
+            double cScore = filter.getCareerScore() * experienceScore;
+            totalScore += cScore;
         }
 
         if (filter.getCertificationScore() != 0) {
             double certificationScore = calculateCertificationScore(filter.getJob_group(), applicant.getCv().getCertifications());
-            totalScore += filter.getCertificationScore() * certificationScore;
+            double cScore = filter.getCertificationScore() * certificationScore;
+            totalScore += cScore;
         }
 
         if (filter.getLanguageScore() != 0) {
             double languageScore = calculateLanguageScore(applicant.getCv().getLanguages());
-            totalScore += filter.getLanguageScore() * languageScore;
+            double lScore = filter.getLanguageScore() * languageScore;
+            totalScore += lScore;
         }
 
         if (filter.getEducationScore() != 0) {
             double educationScore = calculateEducationScore(applicant.getCv().getEducations(), filter);
-            totalScore += filter.getEducationScore() * educationScore;
+            double eScore = filter.getEducationScore() * educationScore;
+            totalScore += eScore;
         }
 
 
         applicant.setScore((int) totalScore);
+    }
+
+    public static void calculateScore(FilterRequest filter, Score score, CV cv) {
+        double totalScore = 0;
+
+        if (filter.getAdvantageScore() != 0) {
+            double advantageScore = calculateAdvantageScore(cv.getAdvantages());
+            double aScore = filter.getAdvantageScore() * advantageScore;
+            totalScore += aScore;
+            score.setAdvantage_score((int) aScore);
+        }
+
+        if (filter.getCareerScore() != 0) {
+            double experienceScore = calculateCareerScore(filter.getJob_type(), filter.getJob_year(), cv.getCareers());
+            double cScore = filter.getCareerScore() * experienceScore;
+            totalScore += cScore;
+            score.setCareer_score((int) cScore);
+        }
+
+        if (filter.getCertificationScore() != 0) {
+            double certificationScore = calculateCertificationScore(filter.getJob_group(), cv.getCertifications());
+            double cScore = filter.getCertificationScore() * certificationScore;
+            totalScore += cScore;
+            score.setCertification_score((int) cScore);
+        }
+
+        if (filter.getLanguageScore() != 0) {
+            double languageScore = calculateLanguageScore(cv.getLanguages());
+            double lScore = filter.getLanguageScore() * languageScore;
+            totalScore += lScore;
+            score.setLanguage_score((int) lScore);
+        }
+
+        if (filter.getEducationScore() != 0) {
+            double educationScore = calculateEducationScore(cv.getEducations(), filter);
+            double eScore = filter.getEducationScore() * educationScore;
+            totalScore += eScore;
+
+            score.setEducation_score((int) eScore);
+        }
+
+
+        score.setScore((int) totalScore);
     }
 
     private static double calculateCareerScore(String job_type, String job_year, List<Career> careers) {

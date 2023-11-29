@@ -7,10 +7,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
@@ -19,7 +16,7 @@ import java.util.Date;
 @Log4j2
 public class CVtoExel {
 
-    public static void copyExcelTemplate(ApplicantDetailResponse applicant) throws IOException {
+    public static byte[] copyExcelTemplate(ApplicantDetailResponse applicant) throws IOException {
         String path = "C:" + File.separator +  "pitch_resorces" + File.separator;
 
         String originalFilePath = path + "입사지원서양식.xlsx";
@@ -94,6 +91,7 @@ public class CVtoExel {
         nameCell.setCellValue(applicant.getCv().getUser_email());
 
         for(Advantage advantage : applicant.getCv().getAdvantages()) {
+            if(advantage.getAdvantage_type() == null) break;
             if(advantage.getAdvantage_type().equals("보훈 대상")) {
                 nameRow = firstSheet.getRow(7);
                 nameCell = nameRow.createCell(7);
@@ -116,7 +114,7 @@ public class CVtoExel {
         int row = 10;
 
         for(Education edu : applicant.getCv().getEducations()) {
-
+            if(edu.getEdu_type()== null) break;
             nameRow = firstSheet.getRow(row);
             nameCell = nameRow.createCell(1);
             nameCell.setCellValue(edu.getEdu_type());
@@ -184,6 +182,7 @@ public class CVtoExel {
 
         row = 23;
         for(Language lang : applicant.getCv().getLanguages()) {
+            if(lang.getLanguage_name() ==null) break;
             nameRow = firstSheet.getRow(row);
             nameCell = nameRow.createCell(6);
             nameCell.setCellValue(lang.getLanguage_name());
@@ -244,6 +243,8 @@ public class CVtoExel {
         originalWorkbook.close();
         copiedWorkbook.close();
         originalFile.close();
+
+        return readExcelFile(copiedFilePath);
     }
 
     static class CellStyleCopier {
@@ -261,7 +262,29 @@ public class CVtoExel {
     }
 
     public static String convertToExcelDate(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return dateFormat.format(date);
+        if (date != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            return dateFormat.format(date);
+        } else {
+            return "";
+        }
     }
+
+    public static byte[] readExcelFile(String filePath) {
+        try (InputStream inputStream = new FileInputStream(filePath);
+             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
+
+            return outputStream.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new byte[0]; // 오류 발생 시 빈 배열 반환
+        }
+    }
+
 }

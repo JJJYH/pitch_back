@@ -3,10 +3,12 @@ package com.server.pitch.sort.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.ibatis.type.Alias;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Alias("FilterRequest")
 public class FilterRequest {
     private int advantageScore; //우대사항
     private int careerScore; //경력

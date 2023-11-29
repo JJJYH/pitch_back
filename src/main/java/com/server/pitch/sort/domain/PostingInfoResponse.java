@@ -14,6 +14,8 @@ public class PostingInfoResponse {
     private String req_title; //jobreq 제목
     private String job_group;  //jobreq 직군
     private String job_role;  //jobreq 직무
+    private String qualification; // jobreq 지원자격
+    private String preferred; // jobreq 우대사항
     private int hire_num; //jobreq 채용인원
     private  int hired_num; //apply에서 status_type이 '최종합격'인 사람의 수
     private String job_type; // jobreq 채용형태
