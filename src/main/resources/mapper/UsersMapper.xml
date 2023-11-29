@@ -65,7 +65,7 @@
 
     <insert id="insertUser">
         insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth, dept_no, role, status)
-        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role}, #{status})
+        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role}, COALESCE(#{status}, 'app'))
     </insert>
 
     <update id="updateHr">
