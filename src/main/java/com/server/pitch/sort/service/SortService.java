@@ -1,5 +1,6 @@
 package com.server.pitch.sort.service;
 
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.sort.domain.*;
 
 import java.util.List;
@@ -18,6 +19,11 @@ public interface SortService {
     public List<Map<String, Object>> doWordAnalysis(String text) throws Exception;
     public Score selectScore(int job_posting_no, int apply_no);
     public ApplicantAvgResponse selectAvg(int job_posting_no);
-    public void cvToExcel(List<Integer> list);
-    public byte[] fileDownload(FileDownloadRequest req);
+    public byte[] cvToExcel(List<Integer> list);
+    public byte[] downloadFiles(FileDownloadRequest req);
+    public byte[] downloadFile(FileDownloadRequest req);
+    public List<Map<String, Object>> createWordClouds(int apply_no);
+    public void createScore(int apply_no, CV cv);
+    public void testScore(int applyNo, ApplicantDetailResponse applicant);
+    public void readStatusUpdate(int applyNo);
 }

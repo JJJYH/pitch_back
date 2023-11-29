@@ -22,7 +22,7 @@
                  )
     </insert>
 
-    <!-- 지원자 평균 스펙 -->
+    <!-- 지원자 평균 스펙 조회 쿼리 -->
     <select id="selectAvg" parameterType="int" resultType="ApplicantAvgResponse">
         SELECT
             AVG(avg_activities) AS avgAc,
@@ -142,6 +142,25 @@
         GROUP BY a.apply_no
     </select>
 
+    <!-- 점수 계산에 필요한 공고 정보 조회 쿼리 -->
+    <select id="selectFilter" parameterType="int" resultType="FilterRequest">
+        SELECT job_type, job_year, job_group, education
+        FROM jobreq r
+        JOIN jobposting p ON r.job_req_no = p.job_req_no
+        WHERE p.job_posting_no = #{postingNo}
+    </select>
+
+    <!-- 지원자 점수 생성 쿼리 -->
+    <insert id="insertScore" parameterType="Score">
+        <selectKey keyProperty="score_no" order="BEFORE" resultType="int">
+            SELECT nextval(score_no_seq)
+        </selectKey>
+        INSERT INTO score (score_no, apply_no, advantage_score, career_score,
+                            certification_score, language_score, education_score)
+        VALUES (#{score_no}, #{apply_no}, #{advantage_score},#{career_score},#{certification_score},
+            #{language_score},#{education_score})
+    </insert>
+
     <!--  지원자 목록 조회 서브 쿼리  -->
     <select id="selectEvalList" resultType="CandidateEval">
         SELECT
@@ -158,6 +177,24 @@
         WHERE apply_no = #{apply_no}
         AND e.user_id = u.user_id
     </select>
+
+    <!-- 점수 수정 쿼리 -->
+    <update id="updateScore" parameterType="int">
+        UPDATE
+            apply
+        SET
+            score = #{score}
+        WHERE apply_no = #{applyNo}
+    </update>
+
+    <!-- 입사지원서 열람 여부 변경 -->
+    <update id="updateReadStatus" parameterType="int">
+        UPDATE
+            apply
+        SET
+            read_status = '열람'
+        WHERE apply_no = #{applyNo}
+    </update>
 
     <!-- 지원자 합격/불합격 처리 쿼리 -->
     <update id="updateStatus" parameterType="java.util.LinkedHashMap">
@@ -181,6 +218,8 @@
             jp.job_posting_no,
             jp.posting_status,
             jr.req_title,
+            jr.qualification,
+            jr.preferred,
             jr.posting_type,
             jr.job_group,
             jr.job_year,
@@ -275,6 +314,7 @@
         <result property="ps_statement" column="ps_statement"/>
         <result property="gender" column="gender"/>
         <result property="address" column="address"/>
+        <result property="job_posting_no" column="job_posting_no"/>
         <result property="user_nm" column="user_nm"/>
         <result property="user_phone" column="user_phone"/>
         <result property="user_email" column="user_email"/>

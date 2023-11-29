@@ -1,5 +1,6 @@
 package com.server.pitch.sort.service;
 
+import com.server.pitch.cv.domain.CV;
 import com.server.pitch.cv.domain.CVFile;
 import com.server.pitch.sort.config.EmailConfig;
 import com.server.pitch.sort.domain.*;
@@ -10,6 +11,8 @@ import kr.co.shineware.nlp.komoran.constant.DEFAULT_MODEL;
 import kr.co.shineware.nlp.komoran.core.Komoran;
 import kr.co.shineware.nlp.komoran.model.KomoranResult;
 import lombok.extern.log4j.Log4j2;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
@@ -17,10 +20,7 @@ import org.springframework.util.FileCopyUtils;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -124,52 +124,207 @@ public class SortServiceImpl implements SortService{
     }
 
     @Override
-    public void cvToExcel(List<Integer> list) {
+    public byte[] cvToExcel(List<Integer> list) {
         for(Integer applyNo : list) {
             try {
                 ApplicantDetailResponse applicant = mapper.selectApplicant(applyNo);
                 encodePicture(applicant);
-                CVtoExel.copyExcelTemplate(applicant);
+                return CVtoExel.copyExcelTemplate(applicant);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        return null;
     }
 
     @Override
-    public byte[] fileDownload(FileDownloadRequest req) {
+    public byte[] downloadFiles(FileDownloadRequest req) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
 
             for(Integer applyNo : req.getApplyNo()) {
                 ApplicantDetailResponse applicant = mapper.selectApplicant(applyNo);
                 if(applicant.getCv().getCvFiles().get(0).getFile_name() == null) break;
-                for(CVFile file : applicant.getCv().getCvFiles()) {
-                    for(String type : req.getType()) {
-                        if(file.getType().equals(type)) {
-                            String path = applicant.getCv().getUser_nm() +
-                                    File.separator + type + "(" + applicant.getCv().getUser_nm() + ")." + file.getFile_type();
-                            zipOut.putNextEntry(new ZipEntry(path));
 
-                            File newFile = new File(file.getPath());
+                for(String type : req.getType()) {
+                    if(type.equals("CV")) {
+                        encodePicture(applicant);
+                        byte[] cv = CVtoExel.copyExcelTemplate(applicant);
 
-                            InputStream inputStream = Files.newInputStream(newFile.toPath());
-                            byte[] buffer = new byte[16384];
-                            int len;
-                            while ((len = inputStream.read(buffer)) > 0) {
-                                zipOut.write(buffer, 0, len);
+                        String path = applicant.getCv().getUser_nm() +
+                                File.separator + "입사지원서(" + applicant.getCv().getUser_nm() + ").xlsx";
+                        zipOut.putNextEntry(new ZipEntry(path));
+                        zipOut.write(cv, 0, cv.length);
+                        zipOut.closeEntry();
+                    } else {
+                        for(CVFile file : applicant.getCv().getCvFiles()) {
+                            String fileType = "";
+                            if(type.equals("Portfolio")) {
+                                fileType = "포트폴리오";
+                            } else if(type.equals("Statement")) {
+                                fileType = "자기소개서";
+                            } else if(type.equals("etcDocs")) {
+                                fileType = "기타문서";
+                            }  else if(type.equals("Career")) {
+                                fileType = "경력기술서";
                             }
+                            if(file.getType().equals(type)) {
+                                String path = applicant.getCv().getUser_nm() +
+                                        File.separator + fileType + "(" + applicant.getCv().getUser_nm() + ")." + file.getFile_type();
+                                zipOut.putNextEntry(new ZipEntry(path));
 
-                            zipOut.closeEntry();
-                            inputStream.close();
+                                File newFile = new File(file.getPath());
+
+                                InputStream inputStream = Files.newInputStream(newFile.toPath());
+                                byte[] buffer = new byte[16384];
+                                int len;
+                                while ((len = inputStream.read(buffer)) > 0) {
+                                    zipOut.write(buffer, 0, len);
+                                }
+                                inputStream.close();
+                                zipOut.closeEntry();
+                            }
                         }
                     }
+
                 }
             }
+            zipOut.finish();
+
             return baos.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public byte[] downloadFile(FileDownloadRequest req) {
+        int applyNo = req.getApplyNo().get(0);
+        String type = req.getType().get(0);
+        ApplicantDetailResponse applicant = mapper.selectApplicant(applyNo);
+
+        for(CVFile file : applicant.getCv().getCvFiles()) {
+            if(file.getType().equals(type)) {
+                File newFile = new File(file.getPath());
+
+                try (FileInputStream fis = new FileInputStream(newFile)) {
+                    byte[] bytesArray = new byte[(int) newFile.length()];
+                    fis.read(bytesArray);
+                    return bytesArray;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return new byte[0];
+    }
+
+    @Override
+    public List<Map<String, Object>> createWordClouds(int apply_no) {
+        String filePath = "C:\\pitch_resorces\\더존ICT그룹 입사지원서-(성명)_v7.3.xlsx";
+        Workbook workbook = null;
+        try {
+            workbook = WorkbookFactory.create(new File(filePath));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        int rowindex = 0;
+        int columnindex = 0;
+
+        Sheet sheet = workbook.getSheetAt(2);
+
+        int rows = (sheet.getLastRowNum() + 1);
+        int maxCells = 0;
+        for (rowindex = 0; rowindex < rows; rowindex++) {
+            Row row = sheet.getRow(rowindex);
+            if (row != null) {
+                int cells = (row.getLastCellNum());
+                if (cells > maxCells)
+                    maxCells = cells;
+            }
+
+        }
+
+        String[][] merge = new String[rows][maxCells];
+        for (int i = 0; i < sheet.getNumMergedRegions(); ++i) {
+            CellRangeAddress range = sheet.getMergedRegion(i);
+
+            int mergeRow = range.getFirstRow();
+            int mergeCol = range.getFirstColumn();
+            int rowLength = range.getLastRow() - range.getFirstRow() + 1;
+            int colLength = range.getLastColumn() - range.getFirstColumn() + 1;
+
+            for (int r = 0; r < rowLength; r++) {
+                for (int c = 0; c < colLength; c++) {
+
+                    if (r == 0 && c == 0) {
+                        merge[mergeRow][mergeCol] = rowLength + "," + colLength;
+                    } else {
+                        merge[mergeRow + r][mergeCol + c] = "mergeCell";
+                    }
+
+                }
+            }
+        }
+
+        String[][] text = new String[rows][maxCells];
+        for (rowindex = 0; rowindex < rows; rowindex++) {
+
+            Row row = sheet.getRow(rowindex);
+            if (row != null) {
+                int cells = row.getLastCellNum();
+                for (columnindex = 0; columnindex <= cells; columnindex++) {
+
+                    Cell cell = row.getCell(columnindex);
+
+                    String value = "";
+
+                    if (cell == null) {
+                        continue;
+                    } else {
+                        switch (cell.getCellTypeEnum()) {
+                            case FORMULA:
+                                value = cell.getCellFormula();
+                                break;
+                            case NUMERIC:
+                                value = cell.getNumericCellValue() + "";
+                                break;
+                            case STRING:
+                                value = cell.getStringCellValue() + "";
+                                break;
+                            case BLANK:
+                                value = "";
+                                break;
+                            case BOOLEAN:
+                                value = cell.getBooleanCellValue() + "";
+                                break;
+                            case ERROR:
+                                value = cell.getErrorCellValue() + "";
+                                break;
+                            default:
+                                value = "Unknown Cell Type";
+                                break;
+                        }
+                    }
+                    text[rowindex][columnindex] = value;
+                }
+
+            }
+        }
+        List<Map<String, Object>> rMap = null;
+        try {
+            rMap = doWordAnalysis(Arrays.deepToString(text));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        if (rMap == null) {
+            rMap = new ArrayList<>();
+        }
+
+        return rMap;
     }
 
     @Override
@@ -238,10 +393,19 @@ public class SortServiceImpl implements SortService{
         String status = "";
         String newStatus = "";
         String newStatusType = "평가전";
+        String contents = (String)data.get("contents");
 
         if ("pass".equals(type)) {
             switch (statusType) {
                 case "서류전형":
+                    contents = contents.replaceAll("\\n", "<br>");
+                    contents = "<h3>" + contents + "</h3>";
+                    String text = "<a href='https://work.go.kr/consltJobCarpa/jobPsyExam/" +
+                            "guest/univJobPsyExamInfo.do?psyExamOrgcd=B0236&psyExamStudentId=1001' " +
+                            "style='display: inline-block; width: 150px; height: 40px; padding: 15px 30px;" +
+                            "background-color: #38678f; text-align: center;  margin-top: 50px;" +
+                            "text-decoration: none; color: white; border-radius: 4px;'><b>인적성검사 하러가기</b></a>";
+                    contents += text;
                     newStatus = "final";
                     status = "F";
                     break;
@@ -278,7 +442,7 @@ public class SortServiceImpl implements SortService{
 
         List<ApplicantResponse> list = mapper.selectSortList(req);
 
-        sendMail(list, statusType, (String)data.get("contents"), title);
+        sendMail(list, statusType, contents, title);
 
         for(ApplicantResponse row : list) {
             Map<String, Object> map = new HashMap<>();
@@ -296,7 +460,6 @@ public class SortServiceImpl implements SortService{
 
         return null;
     }
-
 
     @Override
     public PostingInfoResponse findInfoByPostingNo(int postingNo) {
@@ -327,7 +490,7 @@ public class SortServiceImpl implements SortService{
 
         for(ApplicantResponse row : list) {
             Map<String, String> variables = Map.of(
-                    "이름", row.getUser_nm(),
+                    "이름", "<span style='color: #38678f;'>" + row.getUser_nm() + "</span>",
                     "회사명", companyName,
                     "공고명", title
             );
@@ -399,5 +562,39 @@ public class SortServiceImpl implements SortService{
             throw new RuntimeException(e);
         }
 
+    }
+    public void createScore(int apply_no, CV cv) {
+        Score score = new Score();
+        int postingNo = cv.getJob_posting_no();
+        score.setApply_no(apply_no);
+
+        FilterRequest filter = mapper.selectFilter(postingNo);
+
+        filter.setAdvantageScore(5);
+        filter.setCareerScore(30);
+        filter.setCertificationScore(15);
+        filter.setEducationScore(30);
+        filter.setLanguageScore(20);
+
+        ScoreCalculator.calculateScore(filter, score, cv);
+        mapper.insertScore(score);
+        mapper.updateScore(apply_no, score.getScore());
+    }
+
+    public void testScore(int applyNo, ApplicantDetailResponse applicant) {
+
+        int postingNo = applicant.getCv().getJob_posting_no();
+        FilterRequest filter = mapper.selectFilter(postingNo);
+        filter.setAdvantageScore(5);
+        filter.setCareerScore(30);
+        filter.setCertificationScore(15);
+        filter.setEducationScore(30);
+        filter.setLanguageScore(20);
+        ScoreCalculator.calculateScore(filter, applicant);
+    }
+
+    @Override
+    public void readStatusUpdate(int applyNo) {
+        mapper.updateReadStatus(applyNo);
     }
 }
