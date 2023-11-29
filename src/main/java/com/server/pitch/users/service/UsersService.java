@@ -9,4 +9,6 @@ public interface UsersService {
     public List<Users> list();
     public List<Users> hrList();
     public List<Users> noneAppHrList();
+    public void appHr(List<String> selectedUser);
+    public void deleteByUserIdList(List<String> selectedUser);
 }

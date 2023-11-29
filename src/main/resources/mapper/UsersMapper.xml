@@ -65,12 +65,17 @@
 
     <insert id="insertUser">
         insert into users (user_id, user_email, user_pw, user_nm, user_phone, user_birth, dept_no, role, status)
-        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role}, #{status})
+        values (#{user_id}, #{user_email}, #{user_pw}, #{user_nm}, #{user_phone}, DATE_FORMAT(#{user_birth, jdbcType=DATE}, '%Y-%m-%d'), #{department.dept_no}, #{role}, COALESCE(#{status}, 'app'))
     </insert>
 
     <update id="updateHr">
         update users set user_nm = #{user_nm},user_email = #{user_email}, user_phone = #{user_phone}, role = #{role} , dept_no = #{department.dept_no}, status = #{status}
                      where user_id = #{user_id}
+    </update>
+
+    <update id="updateAppHr">
+        update users set status = 'app'
+        where user_id = #{user_id}
     </update>
 
     <delete id="deleteUser">

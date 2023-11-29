@@ -17,4 +17,5 @@ public interface UsersMapper {
     public void updateHr(Users users);
     public void deleteUser(String user_id);
     public List<Users> noneAppHrList();
+    public void updateAppHr(String user_id);
 }

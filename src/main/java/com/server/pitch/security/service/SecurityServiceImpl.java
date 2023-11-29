@@ -91,6 +91,15 @@ public class SecurityServiceImpl implements SecurityService{
     @Override
     public Users createUser(Users user) {
         user.setUser_pw(passwordEncoder.encode((user.getUser_pw())));
+        try {
+            if(user.getDepartment().getDept_name()!=null) {
+                user.setDepartment(usersMapper.selectDept(user.getDepartment().getDept_name()));
+                user.setRole("HR");
+                user.setStatus("none");
+            }
+        }catch (Exception e){
+            log.info("dept 없음");
+        }
         usersMapper.insertUser(user);
         return user;
     }
@@ -98,8 +107,12 @@ public class SecurityServiceImpl implements SecurityService{
     @Override
     public Users createHrAccount(Users user) {
         user.setUser_pw(passwordEncoder.encode((user.getUser_pw())));
-        if(user.getDepartment().getDept_name()!=null) {
-            user.setDepartment(usersMapper.selectDept(user.getDepartment().getDept_name()));
+        try {
+            if(user.getDepartment().getDept_name()!=null) {
+                user.setDepartment(usersMapper.selectDept(user.getDepartment().getDept_name()));
+            }
+        }catch (Exception e){
+            log.info("dept 없음");
         }
         usersMapper.insertUser(user);
         return null;
